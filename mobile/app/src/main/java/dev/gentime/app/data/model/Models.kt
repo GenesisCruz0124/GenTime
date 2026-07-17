@@ -18,6 +18,7 @@ data class Profile(
 @Serializable
 data class DailyRecord(
     val id: String,
+    @SerialName("profile_id") val profileId: String,
     @SerialName("work_date") val workDate: String,
     @SerialName("first_in") val firstIn: String? = null,
     @SerialName("last_out") val lastOut: String? = null,

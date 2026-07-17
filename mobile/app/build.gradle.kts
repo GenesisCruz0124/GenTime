@@ -71,6 +71,16 @@ android {
 }
 
 dependencies {
+    // Pin transitive AndroidX Browser down: 1.10.0 (pulled by supabase auth-kt
+    // for OAuth Custom Tabs, which this app doesn't use) requires compileSdk 36
+    // / AGP 8.9+. Hold it at a compileSdk-35-compatible version.
+    constraints {
+        implementation("androidx.browser:browser") {
+            version { strictly("1.8.0") }
+            because("browser 1.10.0 requires compileSdk 36 / AGP 8.9+; not needed here")
+        }
+    }
+
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
 
@@ -103,12 +113,14 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // Supabase (Kotlin) — 3.x line: modules are auth-kt / postgrest-kt / realtime-kt
-    // under package io.github.jan.supabase.*
-    implementation(platform("io.github.jan-tennert.supabase:bom:3.6.0"))
+    // under package io.github.jan.supabase.*. Pinned to 3.0.3, which is built
+    // with Kotlin 2.0.x (newer 3.6.x pulls ktor 3.4 / Kotlin 2.3 metadata that
+    // the project's Kotlin 2.0.20 compiler can't read).
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.0.3"))
     implementation("io.github.jan-tennert.supabase:postgrest-kt")
     implementation("io.github.jan-tennert.supabase:auth-kt")
     implementation("io.github.jan-tennert.supabase:realtime-kt")
-    implementation("io.ktor:ktor-client-android:3.1.3")
+    implementation("io.ktor:ktor-client-android:3.0.3")
 
     // FCM
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
