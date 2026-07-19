@@ -3,6 +3,7 @@ package dev.gentime.app
 import android.app.Application
 import android.content.Context
 import androidx.work.Configuration
+import dev.gentime.app.data.Supa
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
@@ -37,5 +38,12 @@ class GenTimeApp : Application(), Configuration.Provider {
             }
             prev?.uncaughtException(thread, e)
         }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        // Give the Supabase client an app context so the session persists
+        // across restarts (users stay signed in).
+        Supa.init(this)
     }
 }
