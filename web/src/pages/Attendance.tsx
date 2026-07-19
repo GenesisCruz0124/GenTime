@@ -22,7 +22,7 @@ export default function Attendance() {
     setLoading(true);
     const { data } = await supabase
       .from("daily_records")
-      .select("*, profile:profiles(employee_code, full_name)")
+      .select("*, profile:profiles!profile_id(employee_code, full_name)")
       .gte("work_date", from)
       .lte("work_date", to)
       .order("work_date", { ascending: false });

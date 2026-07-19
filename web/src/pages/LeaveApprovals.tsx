@@ -15,7 +15,7 @@ export default function LeaveApprovals() {
   const load = useCallback(async () => {
     let q = supabase
       .from("leave_requests")
-      .select("*, profile:profiles(employee_code, full_name)")
+      .select("*, profile:profiles!profile_id(employee_code, full_name)")
       .order("created_at", { ascending: false });
     if (filter === "pending") q = q.eq("status", "pending");
     const { data } = await q;

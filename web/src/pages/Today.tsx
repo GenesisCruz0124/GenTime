@@ -17,7 +17,7 @@ export default function Today() {
     (async () => {
       const { data } = await supabase
         .from("daily_records")
-        .select("*, profile:profiles(employee_code, full_name)")
+        .select("*, profile:profiles!profile_id(employee_code, full_name)")
         .eq("work_date", today());
       setRows((data as Row[]) ?? []);
       setLoading(false);

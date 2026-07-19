@@ -22,7 +22,7 @@ export default function Alerts() {
   const load = useCallback(async () => {
     let q = supabase
       .from("alerts")
-      .select("*, profile:profiles(employee_code, full_name)")
+      .select("*, profile:profiles!profile_id(employee_code, full_name)")
       .order("created_at", { ascending: false })
       .limit(100);
     if (!showAcked) q = q.is("acknowledged_at", null);
