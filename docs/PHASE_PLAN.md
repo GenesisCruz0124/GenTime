@@ -19,47 +19,51 @@ gate active throughout.
 | Business-logic RPCs | ✅ | `submit_attendance_event`, `compute_daily_records`, monitors, `report_summary` |
 | Edge Functions (Deno) | ✅ | RPC wrappers + `notify` + `provision_employee` |
 | Seed data | ✅ | Demo org, sites, 5 accounts, shifts |
-| Web dashboard | ✅ code / 🟡 live | Builds clean; needs a real Supabase project to run |
-| Android app | ✅ code / 🟡 build | Written against supabase-kt 3.6.0; **not yet compiled** (no SDK in dev box) |
-| CI (web + android debug) | 🟡 | Workflow present; unproven until first run |
+| Web dashboard | ✅ code / 🟢 live-ready | Builds clean; env points at the live project |
+| Android app | ✅ code / ✅ builds | Compiles in CI + locally (22 MB APK); supabase-kt 3.0.3 |
+| Live Supabase project | ✅ | `gentime-mvp` — migrations 0001–0006 + seed applied, RLS verified over real JWTs |
+| CI (web + android debug) | ✅ | Both jobs green on the branch |
 | Release workflow (signed APK) | 🟡 | Present; needs keystore + secrets |
 | Firebase / FCM | ⬜ | `google-services.json` is a placeholder |
 | Push notifications wiring | 🟡 | DB triggers + `notify` fn exist; need FCM creds + pg_net settings |
 
 ---
 
-## Phase 0 — Environment & provisioning *(prerequisite, ~0.5 day)*
+## Phase 0 — Environment & provisioning ✅ *(mostly done)*
 
-Stand up the infrastructure the code assumes.
+Stand up the infrastructure the code assumes. See [`ENVIRONMENT.md`](ENVIRONMENT.md).
 
-- ⬜ Create the Supabase project; capture `SUPABASE_URL` + anon/service keys.
-- ⬜ `supabase db push` (migrations) + load `seed.sql` in a non-prod project.
-- ⬜ Enable extensions: `pg_cron`, `pg_net` (for scheduled jobs + notify dispatch).
-- ⬜ Set DB settings used by triggers: `app.settings.functions_url`,
-  `app.settings.service_role_key`.
+- ✅ Supabase project `gentime-mvp` created; URL + anon key captured.
+- ✅ Migrations 0001–0006 + seed applied to the live project.
+- ✅ `pg_cron` enabled and 4 jobs scheduled; Realtime enabled.
+- ⬜ Enable `pg_net` + set `app.settings.functions_url` /
+  `app.settings.service_role_key` (needed only for FCM dispatch).
 - ⬜ Create the Firebase project; replace `mobile/app/google-services.json`;
   add `FCM_PROJECT_ID` / service-account credentials to function secrets.
 - ⬜ Generate an upload keystore; add GitHub secrets: `KEYSTORE_BASE64`,
   `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`, `SUPABASE_URL`,
   `SUPABASE_ANON_KEY`.
 
-**Exit criteria:** migrations applied to a live project; web dashboard loads
-against it; a debug APK installs and reaches the login screen.
+**Exit criteria:** ✅ migrations applied to a live project; RLS verified over
+real JWTs. Remaining: Firebase + keystore secrets for push and signed release.
 
 ---
 
-## Phase 1 — Backend foundation ✅ *(code complete — validate live)*
+## Phase 1 — Backend foundation ✅ *(live & verified)*
 
 Spec deliverables: schema + RLS + seed, Auth, Edge Functions 1–2, web login +
 Employees & Sites CRUD.
 
 - ✅ Schema, RLS, seed, RPCs, Edge Functions, web CRUD — all in repo.
-- 🟡 Remaining: run against the live project; confirm RLS with real JWTs
-  (not just the local role simulation already done); deploy Edge Functions;
-  schedule cron jobs.
+- ✅ Applied to the live project; cron jobs scheduled.
+- ✅ RLS confirmed with **real JWTs** over the REST API (employee sees self,
+  supervisor sees team of 4, admin sees all 5).
+- ✅ `submit_attendance_event` geofence verified live.
+- ⬜ Remaining: deploy Edge Functions (`export_report`, `provision_employee`,
+  `notify`) — core RPC paths already work without them.
 
-**Exit criteria:** admin signs into the web app, provisions an employee +
-site, and the row appears under the correct RLS scope.
+**Exit criteria:** ✅ met — admin/supervisor/employee sign in and see exactly
+their RLS-scoped rows against the live database.
 
 ---
 
