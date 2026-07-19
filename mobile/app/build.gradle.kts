@@ -30,7 +30,7 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", cfg("SUPABASE_URL", "SUPABASE_URL"))
         buildConfigField("String", "SUPABASE_ANON_KEY", cfg("SUPABASE_ANON_KEY", "SUPABASE_ANON_KEY"))
-        buildConfigField("String", "APP_VERSION", "\"1.0.0 · build 12\"")
+        buildConfigField("String", "APP_VERSION", "\"1.0.0 · build 13\"")
     }
 
     signingConfigs {
@@ -95,8 +95,16 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    // Biometrics
+    // Biometrics. biometric 1.1.0 transitively pins androidx.fragment 1.2.5,
+    // whose FragmentActivity rejects any Activity Result request code that
+    // doesn't fit in 16 bits — but androidx.activity 1.9.x's permission
+    // launcher always generates codes >= 65536, so requesting a permission
+    // crashed with "Can only use lower 16 bits for requestCode". Fragment
+    // 1.3.0+ routes permission requests through the ActivityResultRegistry and
+    // no longer applies that check, so force a modern, activity-1.9-compatible
+    // version.
     implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
 
     // Location
     implementation("com.google.android.gms:play-services-location:21.3.0")
