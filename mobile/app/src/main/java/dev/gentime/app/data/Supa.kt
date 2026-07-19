@@ -7,6 +7,7 @@ import io.github.jan.supabase.auth.minimalSettings
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Process-wide Supabase client. Config injected at build time via BuildConfig.
@@ -22,6 +23,9 @@ object Supa {
             supabaseUrl = BuildConfig.SUPABASE_URL,
             supabaseKey = BuildConfig.SUPABASE_ANON_KEY,
         ) {
+            // Default is 10s — too tight on slow mobile connections (users saw
+            // "request timeout has expired" on cellular). Give it real headroom.
+            requestTimeout = 60.seconds
             install(Auth) { minimalSettings() }
             install(Postgrest)
             install(Realtime)
