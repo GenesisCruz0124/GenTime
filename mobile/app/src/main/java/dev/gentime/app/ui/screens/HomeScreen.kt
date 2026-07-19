@@ -3,6 +3,8 @@ package dev.gentime.app.ui.screens
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,6 +42,8 @@ import kotlinx.coroutines.launch
 
 private fun hasLocationPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
         PackageManager.PERMISSION_GRANTED
 
 @Composable
@@ -51,7 +55,7 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     var message by remember { mutableStateOf<String?>(null) }
     val pending by repo.pendingCount.collectAsState(initial = 0)
 
-    fun doPunch() {
+    fun realDoPunch() {
         if (busy) return
         busy = true
         message = null
@@ -91,6 +95,29 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
         }
     }
 
+    val locationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { result ->
+        if (result.values.any { it }) realDoPunch()  // granted → proceed
+        else message = "Location is off. Enable it in Settings › Apps › GenTime › " +
+            "Permissions to share your position, then check in again."
+    }
+
+    // Checking IN needs location (for GPS + geofence). If it isn't granted yet,
+    // ask right here, then punch. Checking OUT doesn't need it.
+    fun onPunchClick() {
+        if (!onClock && !hasLocationPermission(activity)) {
+            locationLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                ),
+            )
+        } else {
+            realDoPunch()
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,7 +141,7 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
         Spacer(Modifier.height(48.dp))
 
         Button(
-            onClick = { doPunch() },
+            onClick = { onPunchClick() },
             enabled = !busy,
             shape = CircleShape,
             colors = ButtonDefaults.buttonColors(
