@@ -58,12 +58,20 @@ class TrackingService : Service() {
 
     @SuppressLint("MissingPermission")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(NOTIF_ID, buildNotification())
-        val request = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, INTERVAL_MS)
-            .setMinUpdateIntervalMillis(INTERVAL_MS)
-            .build()
-        client.requestLocationUpdates(request, callback, mainLooper)
-        return START_STICKY
+        // startForeground with type=location throws SecurityException if location
+        // permission isn't granted (Android 14+). Fail soft — never crash the app;
+        // the punch is already recorded, tracking is a best-effort extra.
+        return try {
+            startForeground(NOTIF_ID, buildNotification())
+            val request = LocationRequest.Builder(Priority.PRIORITY_BALANCED_POWER_ACCURACY, INTERVAL_MS)
+                .setMinUpdateIntervalMillis(INTERVAL_MS)
+                .build()
+            client.requestLocationUpdates(request, callback, mainLooper)
+            START_STICKY
+        } catch (e: Exception) {
+            stopSelf()
+            START_NOT_STICKY
+        }
     }
 
     override fun onDestroy() {

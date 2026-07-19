@@ -1,5 +1,9 @@
 package dev.gentime.app.ui.screens
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -34,6 +38,10 @@ import dev.gentime.app.location.LocationHelper
 import dev.gentime.app.location.TrackingService
 import kotlinx.coroutines.launch
 
+private fun hasLocationPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+
 @Composable
 fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     val scope = rememberCoroutineScope()
@@ -59,8 +67,22 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
                 repo.punch(type, fix?.lat, fix?.lng, fix?.accuracyM)
 
                 onClock = !onClock
-                if (onClock) TrackingService.start(activity) else TrackingService.stop(activity)
-                message = if (onClock) "Checked in" else "Checked out"
+                if (onClock) {
+                    // A location foreground service can only start when location
+                    // permission is granted (Android 14+). Tracking is optional
+                    // — the punch is already recorded either way.
+                    if (hasLocationPermission(activity)) {
+                        runCatching { TrackingService.start(activity) }
+                    }
+                } else {
+                    runCatching { TrackingService.stop(activity) }
+                }
+                message = when {
+                    onClock && !hasLocationPermission(activity) ->
+                        "Checked in (grant location to share your position while on the clock)"
+                    onClock -> "Checked in"
+                    else -> "Checked out"
+                }
             } catch (e: Exception) {
                 message = e.message ?: "Something went wrong"
             } finally {
