@@ -2,7 +2,10 @@ package dev.gentime.app.ui.screens
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -53,7 +56,21 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     var onClock by remember { mutableStateOf(session.onTheClock) }
     var busy by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
+    // Shown when the OS won't display the permission dialog (previously denied
+    // with "don't ask again") — offers a one-tap jump to the app's settings.
+    var showOpenSettings by remember { mutableStateOf(false) }
     val pending by repo.pendingCount.collectAsState(initial = 0)
+
+    fun openAppSettings() {
+        runCatching {
+            activity.startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", activity.packageName, null),
+                ),
+            )
+        }
+    }
 
     fun realDoPunch() {
         if (busy) return
@@ -98,14 +115,30 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     val locationLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
     ) { result ->
-        if (result.values.any { it }) realDoPunch()  // granted → proceed
-        else message = "Location is off. Enable it in Settings › Apps › GenTime › " +
-            "Permissions to share your position, then check in again."
+        if (result.values.any { it }) {
+            showOpenSettings = false
+            realDoPunch()  // granted → proceed
+        } else {
+            // Denied. If the system won't offer the dialog again
+            // (shouldShowRationale is false after a denial = "don't ask
+            // again"), send the user straight to app settings instead.
+            val canAskAgain = activity.shouldShowRequestPermissionRationale(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+            )
+            message = if (canAskAgain) {
+                "Location is required to check in. Please allow it when asked."
+            } else {
+                "Location is turned off for GenTime. Tap \"Open Settings\", " +
+                    "enable Location, then check in again."
+            }
+            showOpenSettings = !canAskAgain
+        }
     }
 
     // Checking IN needs location (for GPS + geofence). If it isn't granted yet,
     // ask right here, then punch. Checking OUT doesn't need it.
     fun onPunchClick() {
+        showOpenSettings = false
         if (!onClock && !hasLocationPermission(activity)) {
             locationLauncher.launch(
                 arrayOf(
@@ -159,5 +192,9 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
 
         Spacer(Modifier.height(24.dp))
         message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        if (showOpenSettings) {
+            Spacer(Modifier.height(12.dp))
+            Button(onClick = { openAppSettings() }) { Text("Open Settings") }
+        }
     }
 }
