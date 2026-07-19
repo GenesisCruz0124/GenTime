@@ -4,8 +4,9 @@ import android.content.Context
 import dev.gentime.app.BuildConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.MemoryCodeVerifierCache
+import io.github.jan.supabase.auth.MemorySessionManager
 import io.github.jan.supabase.auth.SessionManager
-import io.github.jan.supabase.auth.minimalSettings
 import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -62,11 +63,17 @@ object Supa {
         ) {
             requestTimeout = 60.seconds  // 10s default is too tight on mobile
             install(Auth) {
-                if (ctx != null) {
-                    sessionManager = PrefsSessionManager(ctx)
-                } else {
-                    minimalSettings()  // in-memory fallback; never crashes
-                }
+                // BOTH sessionManager and codeVerifierCache must be set. The
+                // library resolves each eagerly in AuthImpl's constructor and,
+                // when null, builds a Settings-backed default whose factory
+                // (createDefaultSettings) throws "Failed to create default
+                // settings for SettingsSessionManager" on this app — the
+                // androidx.startup context provider it relies on is disabled.
+                // Setting only one still crashed via the other.
+                sessionManager = if (ctx != null) PrefsSessionManager(ctx) else MemorySessionManager()
+                // Email/password sign-in doesn't use PKCE, so an in-memory
+                // code-verifier cache is sufficient and never touches Settings.
+                codeVerifierCache = MemoryCodeVerifierCache()
             }
             install(Postgrest)
             install(Realtime)
