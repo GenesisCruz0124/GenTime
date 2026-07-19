@@ -60,5 +60,14 @@
             android:name="com.google.firebase.provider.FirebaseInitProvider"
             android:authorities="${applicationId}.firebaseinitprovider"
             tools:node="remove" />
+
+        <!-- Disable androidx.startup auto-init: it runs before Application
+             .onCreate, so a failure there is an invisible startup crash. We
+             init WorkManager on demand (Configuration.Provider) and the
+             Supabase client is self-contained (in-memory session). -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
     </application>
 </manifest>
