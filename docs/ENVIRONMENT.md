@@ -56,11 +56,26 @@ npm install
 npm run dev        # http://localhost:5173 — sign in with an account above
 ```
 
+## Edge Functions (deployed & verified)
+
+| Function | verify_jwt | Verified live |
+|---|---|---|
+| `provision_employee` | yes | admin creates account → 201; employee → `forbidden` (403) |
+| `export_report` | yes | returns payroll CSV for a date range (RLS-scoped) |
+| `notify` | yes | resolves fcm_token; no-ops as `fcm_not_configured` until FCM env set |
+
+`submit_attendance_event` is not deployed as a function — the mobile app calls
+the in-database RPC of the same name directly.
+
 ## Not yet configured (post-Phase-1)
 
 - **FCM / Firebase** — push is inert until a real Firebase project + credentials
-  replace the placeholder `mobile/app/google-services.json`, and pg_net +
-  `app.settings.functions_url` / `app.settings.service_role_key` are set.
-- **Edge Functions** — deploy with `supabase functions deploy` when needed
-  (`export_report`, `provision_employee`, `notify`). Core write/read paths use
-  in-database RPCs and work without them.
+  replace the placeholder `mobile/app/google-services.json`, `FCM_PROJECT_ID` /
+  `FCM_ACCESS_TOKEN` are set on the `notify` function, and pg_net +
+  `app.settings.functions_url` / `app.settings.service_role_key` are configured.
+- **Signed release** — keystore + GitHub secrets to tag `v1.0.0`.
+
+## Test build
+
+A debug APK wired to this project is produced from `mobile/` with
+`./gradlew :app:assembleDebug` (config comes from `mobile/local.properties`).
