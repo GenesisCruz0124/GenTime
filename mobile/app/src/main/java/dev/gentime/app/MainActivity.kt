@@ -3,6 +3,7 @@ package dev.gentime.app
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,17 +30,14 @@ import dev.gentime.app.ui.theme.GenTimeTheme
 
 /**
  * FragmentActivity is required for AndroidX BiometricPrompt. Hosts the whole
- * Compose app; permissions (fine location + notifications) are requested up
- * front. Background location is intentionally NOT requested.
+ * Compose app.
  *
- * If a previous launch crashed, we show that trace FIRST (bare MaterialTheme,
- * before touching permissions or the app graph) so the error is always
- * visible on the next open regardless of where it happened.
+ * Permissions are requested from Compose via rememberLauncherForActivityResult
+ * (see RequestStartupPermissions). Launching an ActivityResultLauncher directly
+ * from onCreate crashed on some OEM/Android-16 builds; the Compose launcher is
+ * lifecycle-safe. Background location is intentionally NOT requested.
  */
 class MainActivity : FragmentActivity() {
-
-    private val permissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,23 +53,32 @@ class MainActivity : FragmentActivity() {
             return
         }
 
-        runCatching { requestPermissions() }
-
         setContent {
             GenTimeTheme {
+                RequestStartupPermissions()
                 val vm: AppViewModel = viewModel()
                 val state by vm.state.collectAsStateWithLifecycle()
                 AppRoot(state = state, vm = vm, activity = this)
             }
         }
     }
+}
 
-    private fun requestPermissions() {
-        val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            perms += Manifest.permission.POST_NOTIFICATIONS
-        }
-        permissionLauncher.launch(perms.toTypedArray())
+/** Requests fine location (+ notifications on 13+) once, safely, from Compose. */
+@Composable
+private fun RequestStartupPermissions() {
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions(),
+    ) { /* result ignored; features degrade gracefully if denied */ }
+
+    LaunchedEffect(Unit) {
+        val perms = buildList {
+            add(Manifest.permission.ACCESS_FINE_LOCATION)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }.toTypedArray()
+        runCatching { launcher.launch(perms) }
     }
 }
 
