@@ -33,6 +33,11 @@ fun LoginScreen(state: AppState, onSignIn: (String, String) -> Unit) {
     ) {
         Text("GenTime", style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
         Text("Sign in to record your attendance", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            dev.gentime.app.BuildConfig.APP_VERSION,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
 
         OutlinedTextField(
             value = email, onValueChange = { email = it },
