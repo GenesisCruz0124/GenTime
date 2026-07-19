@@ -31,17 +31,24 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
-            Supa.client.auth.awaitInitialization()
-            refresh()
+            try {
+                Supa.client.auth.awaitInitialization()
+                refresh()
+            } catch (e: Exception) {
+                // Never let session restore crash the app; land on the login screen.
+                _state.value = _state.value.copy(loading = false, signedIn = false, error = e.message)
+            }
         }
         viewModelScope.launch {
-            repo.pendingCount.collect { n -> _state.value = _state.value.copy(pending = n) }
+            runCatching {
+                repo.pendingCount.collect { n -> _state.value = _state.value.copy(pending = n) }
+            }
         }
     }
 
     private suspend fun refresh() {
         val signedIn = Supa.client.auth.currentUserOrNull() != null
-        val profile = if (signedIn) repo.currentProfile() else null
+        val profile = if (signedIn) runCatching { repo.currentProfile() }.getOrNull() else null
         _state.value = _state.value.copy(loading = false, signedIn = signedIn, profile = profile)
     }
 
