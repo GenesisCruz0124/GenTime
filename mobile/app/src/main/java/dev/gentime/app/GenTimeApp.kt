@@ -24,6 +24,9 @@ class GenTimeApp : Application(), Configuration.Provider {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
+        // Earliest possible point — guarantees the persistent session manager
+        // has a context before the Supabase client is ever accessed.
+        Supa.init(base)
         val prev = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, e ->
             runCatching {
