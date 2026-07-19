@@ -30,6 +30,10 @@ import dev.gentime.app.ui.theme.GenTimeTheme
  * FragmentActivity is required for AndroidX BiometricPrompt. Hosts the whole
  * Compose app; permissions (fine location + notifications) are requested up
  * front. Background location is intentionally NOT requested.
+ *
+ * If a previous launch crashed, we show that trace FIRST (bare MaterialTheme,
+ * before touching permissions or the app graph) so the error is always
+ * visible on the next open regardless of where it happened.
  */
 class MainActivity : FragmentActivity() {
 
@@ -38,20 +42,25 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestPermissions()
 
         val diag = getSharedPreferences("gentime_diag", MODE_PRIVATE)
         val lastCrash = diag.getString("last_crash", null)
+        if (lastCrash != null) {
+            setContent {
+                MaterialTheme {
+                    CrashScreen(lastCrash) { diag.edit().remove("last_crash").apply(); recreate() }
+                }
+            }
+            return
+        }
+
+        runCatching { requestPermissions() }
 
         setContent {
             GenTimeTheme {
-                if (lastCrash != null) {
-                    CrashScreen(lastCrash) { diag.edit().remove("last_crash").apply(); recreate() }
-                } else {
-                    val vm: AppViewModel = viewModel()
-                    val state by vm.state.collectAsStateWithLifecycle()
-                    AppRoot(state = state, vm = vm, activity = this)
-                }
+                val vm: AppViewModel = viewModel()
+                val state by vm.state.collectAsStateWithLifecycle()
+                AppRoot(state = state, vm = vm, activity = this)
             }
         }
     }
