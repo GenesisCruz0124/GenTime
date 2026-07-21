@@ -30,8 +30,10 @@ import dev.gentime.app.ui.screens.AttendanceScreen
 import dev.gentime.app.ui.screens.HomeScreen
 import dev.gentime.app.ui.screens.LeaveScreen
 import dev.gentime.app.ui.screens.LoginScreen
+import dev.gentime.app.ui.screens.SetPinScreen
 import dev.gentime.app.ui.screens.SettingsScreen
 import dev.gentime.app.ui.screens.SupervisorScreen
+import dev.gentime.app.ui.screens.UnlockScreen
 
 private data class Tab(val route: String, val label: String, val icon: ImageVector)
 
@@ -43,6 +45,21 @@ fun AppRoot(state: AppState, vm: AppViewModel, activity: FragmentActivity) {
     }
     if (!state.signedIn) {
         LoginScreen(state = state, onSignIn = vm::signIn)
+        return
+    }
+    // Signed in, but the restored session sits behind the app-lock PIN.
+    if (state.locked) {
+        UnlockScreen(
+            pinLength = vm.pinLength,
+            verify = vm::verifyPin,
+            onUnlocked = vm::unlock,
+            onUsePassword = vm::signOut,
+        )
+        return
+    }
+    // First sign-in on this device: set the PIN that future launches will use.
+    if (!state.hasPin) {
+        SetPinScreen(onCreate = vm::createPin, onSignOut = vm::signOut)
         return
     }
 
