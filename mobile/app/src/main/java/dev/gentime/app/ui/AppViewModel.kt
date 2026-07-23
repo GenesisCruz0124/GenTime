@@ -88,6 +88,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun verifyPin(entry: String): Boolean = pin.verify(entry)
+    fun pinLockoutRemainingMs(): Long = pin.lockoutRemainingMs()
 
     fun unlock() {
         _state.value = _state.value.copy(locked = false)
