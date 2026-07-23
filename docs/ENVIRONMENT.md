@@ -36,6 +36,7 @@ All use password **`Password123!`**.
 | `emp1@gentime.dev` | employee | GT-0003 | HQ — Makati |
 | `emp2@gentime.dev` | employee | GT-0004 | HQ — Makati |
 | `emp3@gentime.dev` | employee | GT-0005 | Warehouse — Pasig |
+| `emp4@gentime.dev` | employee | GT-0006 | created live via `provision_employee` (Dan Rivera) |
 
 ## Verified against the live project
 
