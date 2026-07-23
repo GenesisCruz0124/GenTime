@@ -1,0 +1,57 @@
+# GenTime — Supabase local config
+# Docs: https://supabase.com/docs/guides/cli/config
+
+project_id = "gentime"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[realtime]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173"]
+jwt_expiry = 3600
+enable_signup = false          # accounts are provisioned by admins only
+
+[auth.email]
+enable_signup = false
+enable_confirmations = false
+
+[functions.submit_attendance_event]
+verify_jwt = true
+
+[functions.compute_daily_records]
+verify_jwt = false             # invoked by scheduler / admin service role
+
+[functions.geofence_monitor]
+verify_jwt = false
+
+[functions.missed_checkin_monitor]
+verify_jwt = false
+
+[functions.purge_old_pings]
+verify_jwt = false
+
+[functions.export_report]
+verify_jwt = true
+
+[functions.notify]
+verify_jwt = false             # internal, called via pg_net with service role
+
+[functions.provision_employee]
+verify_jwt = true              # admin check performed inside the function

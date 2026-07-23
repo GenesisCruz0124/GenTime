@@ -1,0 +1,596 @@
+<title>GenTime — Screen Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --brand: #2563eb;
+    --brand-deep: #1e40af;
+    --brand-soft: #dbe6fe;
+    --ink: #0e1729;
+    --body: #33415a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --line-soft: #eef2f7;
+    --ground: #f4f7fb;
+    --panel: #ffffff;
+    --panel-2: #f8fafc;
+    --shadow: 0 1px 2px rgba(15,23,42,.06), 0 8px 24px -12px rgba(15,23,42,.18);
+    --shadow-lg: 0 24px 60px -24px rgba(15,23,42,.35);
+
+    --ok: #16a34a; --ok-bg: #dcfce7; --ok-ink: #166534;
+    --late: #d97706; --late-bg: #fef3c7; --late-ink: #92400e;
+    --bad: #dc2626; --bad-bg: #fee2e2; --bad-ink: #991b1b;
+    --leave: #7c3aed; --leave-bg: #ede9fe; --leave-ink: #5b21b6;
+    --idle: #64748b; --idle-bg: #e9eef5; --idle-ink: #475569;
+
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --r: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --brand: #5b8cff; --brand-deep: #3b6be0; --brand-soft: #16233f;
+      --ink: #eaf0fb; --body: #b7c2d6; --muted: #8593ab;
+      --line: #1e293b; --line-soft: #17202f; --ground: #070b14;
+      --panel: #0e1526; --panel-2: #0b1220;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.6);
+      --shadow-lg: 0 30px 70px -28px rgba(0,0,0,.75);
+      --ok-bg: #10281a; --ok-ink: #6ee7a5;
+      --late-bg: #2b2008; --late-ink: #fbbf5a;
+      --bad-bg: #2c1214; --bad-ink: #fca5a5;
+      --leave-bg: #1e1633; --leave-ink: #c4b5fd;
+      --idle-bg: #141c2b; --idle-ink: #94a3b8;
+    }
+  }
+  :root[data-theme="light"] {
+    --brand:#2563eb;--brand-deep:#1e40af;--brand-soft:#dbe6fe;--ink:#0e1729;--body:#33415a;--muted:#64748b;
+    --line:#e2e8f0;--line-soft:#eef2f7;--ground:#f4f7fb;--panel:#fff;--panel-2:#f8fafc;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.18);--shadow-lg:0 24px 60px -24px rgba(15,23,42,.35);
+    --ok-bg:#dcfce7;--ok-ink:#166534;--late-bg:#fef3c7;--late-ink:#92400e;--bad-bg:#fee2e2;--bad-ink:#991b1b;
+    --leave-bg:#ede9fe;--leave-ink:#5b21b6;--idle-bg:#e9eef5;--idle-ink:#475569;
+  }
+  :root[data-theme="dark"] {
+    --brand:#5b8cff;--brand-deep:#3b6be0;--brand-soft:#16233f;--ink:#eaf0fb;--body:#b7c2d6;--muted:#8593ab;
+    --line:#1e293b;--line-soft:#17202f;--ground:#070b14;--panel:#0e1526;--panel-2:#0b1220;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);--shadow-lg:0 30px 70px -28px rgba(0,0,0,.75);
+    --ok-bg:#10281a;--ok-ink:#6ee7a5;--late-bg:#2b2008;--late-ink:#fbbf5a;--bad-bg:#2c1214;--bad-ink:#fca5a5;
+    --leave-bg:#1e1633;--leave-ink:#c4b5fd;--idle-bg:#141c2b;--idle-ink:#94a3b8;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--body);
+    font-family: var(--sans); line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 72px; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Page header ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center;
+    background: linear-gradient(150deg, var(--brand), var(--brand-deep)); color: #fff; box-shadow: var(--shadow);
+  }
+  .logo svg { width: 22px; height: 22px; }
+  .brand h1 { margin: 0; font-size: 20px; letter-spacing: -.02em; color: var(--ink); font-weight: 700; }
+  .brand p { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .theme-btn {
+    border: 1px solid var(--line); background: var(--panel); color: var(--body);
+    border-radius: 999px; padding: 8px 14px; font: inherit; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .theme-btn:hover { border-color: var(--brand); color: var(--ink); }
+  .theme-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .lede { margin: 22px 0 4px; color: var(--ink); font-size: 28px; letter-spacing: -.025em; font-weight: 750; text-wrap: balance; max-width: 22ch; }
+  .sub { margin: 0 0 22px; max-width: 62ch; color: var(--muted); font-size: 15px; }
+
+  /* ---------- Surface switcher ---------- */
+  .seg {
+    display: inline-flex; padding: 4px; gap: 4px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 999px; margin-bottom: 26px;
+  }
+  .seg button {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600; font-size: 13.5px;
+    padding: 8px 18px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .seg button[aria-selected="true"] { background: var(--brand); color: #fff; box-shadow: var(--shadow); }
+  .seg button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .surface { display: none; }
+  .surface.active { display: block; animation: fade .35s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .surface.active, .screen { animation: none !important; } }
+
+  /* ---------- Browser frame ---------- */
+  .browser { border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--panel); box-shadow: var(--shadow-lg); }
+  .chrome { display: flex; align-items: center; gap: 12px; padding: 11px 14px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
+  .dots { display: flex; gap: 6px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .dots i:nth-child(1){ background:#f87171; } .dots i:nth-child(2){ background:#fbbf24; } .dots i:nth-child(3){ background:#34d399; }
+  .url { flex: 1; background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; color: var(--muted); font-family: var(--mono); }
+
+  .app { display: grid; grid-template-columns: 210px 1fr; min-height: 560px; }
+  .side { border-right: 1px solid var(--line); padding: 16px 12px; background: var(--panel-2); display: flex; flex-direction: column; }
+  .side .who { padding: 6px 10px 14px; }
+  .side .who b { color: var(--ink); font-size: 15px; }
+  .side .who span { display:block; color: var(--muted); font-size: 12px; text-transform: capitalize; }
+  .nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .nav button {
+    text-align: left; border: 0; background: transparent; color: var(--body); font: inherit; font-size: 13.5px;
+    padding: 9px 11px; border-radius: 9px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  }
+  .nav button:hover { background: var(--line-soft); }
+  .nav button[aria-selected="true"] { background: var(--brand); color: #fff; font-weight: 600; }
+  .nav button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .nav .ico { width: 16px; height: 16px; opacity: .85; }
+  .signout { color: var(--bad); }
+
+  .view { padding: 22px 24px; overflow: auto; }
+  .view h2 { margin: 0 0 2px; color: var(--ink); font-size: 20px; letter-spacing: -.02em; }
+  .view .date { margin: 0 0 18px; color: var(--muted); font-size: 13px; }
+  .page { display: none; }
+  .page.active { display: block; animation: fade .3s ease; }
+
+  /* status chip */
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 650; text-transform: capitalize; letter-spacing: .01em; }
+  .chip::before { content:""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .chip.ok { background: var(--ok-bg); color: var(--ok-ink); }
+  .chip.late { background: var(--late-bg); color: var(--late-ink); }
+  .chip.bad { background: var(--bad-bg); color: var(--bad-ink); }
+  .chip.leave { background: var(--leave-bg); color: var(--leave-ink); }
+  .chip.idle { background: var(--idle-bg); color: var(--idle-ink); }
+
+  /* Today board */
+  .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .col { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+  .col > header { display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-bottom: 1px dashed var(--line); }
+  .col .big { font-size: 22px; font-weight: 750; color: var(--ink); }
+  .col ul { list-style: none; margin: 0; padding: 8px; display: flex; flex-direction: column; gap: 6px; min-height: 60px; }
+  .col li { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--body); background: var(--panel-2); border-radius: 8px; padding: 7px 9px; }
+  .col li .lt { color: var(--late-ink); font-weight: 650; }
+  .col .empty { color: var(--muted); font-size: 12px; padding: 10px; text-align: center; }
+
+  /* tables */
+  .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .tbl th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  .tbl td { padding: 11px 12px; border-bottom: 1px solid var(--line-soft); color: var(--body); }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl tbody tr:hover { background: var(--panel-2); }
+  .card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+  .pill-input { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 11px; font: inherit; font-size: 13px; color: var(--ink); }
+  .btn { border: 0; background: var(--brand); color: #fff; border-radius: 8px; padding: 8px 16px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: var(--brand-deep); }
+  .btn.ghost { background: var(--panel); color: var(--body); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--brand); color: var(--ink); background: var(--panel); }
+  .btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* live map */
+  .map { position: relative; height: 470px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    background:
+      radial-gradient(1200px 600px at 20% 10%, color-mix(in oklab, var(--brand) 8%, transparent), transparent 60%),
+      var(--panel-2); }
+  .map .grid { position: absolute; inset: 0;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 46px 46px; opacity: .5; }
+  .road { position: absolute; background: var(--line); opacity: .8; }
+  .geofence { position: absolute; border-radius: 50%; border: 2px solid color-mix(in oklab, var(--brand) 70%, transparent);
+    background: color-mix(in oklab, var(--brand) 12%, transparent); display: grid; place-items: end center; }
+  .geofence span { transform: translateY(20px); font-size: 11px; color: var(--brand); font-weight: 650; white-space: nowrap; background: var(--panel); padding: 1px 7px; border-radius: 6px; border: 1px solid var(--line); }
+  .pin { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid var(--panel); transform: translate(-50%,-50%); box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+  .pin.in { background: var(--ok); } .pin.out { background: var(--bad); }
+  .pin.out::after { content:""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--bad); opacity: .5; animation: ping 1.8s ease-out infinite; }
+  @keyframes ping { 0%{ transform: scale(.6); opacity: .6;} 100%{ transform: scale(1.8); opacity: 0; } }
+  .legend { position: absolute; left: 14px; bottom: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow); }
+  .legend div { display: flex; align-items: center; gap: 8px; color: var(--body); }
+  .legend i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+
+  /* alerts + leave list */
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 13px 15px; }
+  .row .lead { display: flex; align-items: center; gap: 12px; }
+  .sev { width: 8px; height: 38px; border-radius: 6px; }
+  .sev.bad { background: var(--bad); } .sev.late { background: var(--late); } .sev.brand { background: var(--brand); }
+  .row b { color: var(--ink); font-size: 14px; }
+  .row small { color: var(--muted); font-size: 12px; }
+
+  /* ---------- Phones ---------- */
+  .phones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+  @media (max-width: 900px){ .phones { grid-template-columns: 1fr; justify-items: center; } .app { grid-template-columns: 1fr; } .side { display:none; } .board { grid-template-columns: repeat(2,1fr);} }
+  .phone { width: 100%; max-width: 300px; margin: 0 auto; }
+  .phone .cap { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+  .device { border-radius: 34px; background: var(--ink); padding: 10px; box-shadow: var(--shadow-lg); }
+  .glass { border-radius: 26px; overflow: hidden; background: var(--panel); position: relative; height: 560px; display: flex; flex-direction: column; }
+  .notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 90px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.25); z-index: 5; }
+  .statusbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 6px; font-size: 11px; color: var(--muted); }
+  .mbody { padding: 8px 16px 0; overflow: auto; flex: 1; }
+  .mtitle { color: var(--ink); font-weight: 700; font-size: 17px; margin: 6px 2px 12px; }
+  .mtabbar { display: flex; border-top: 1px solid var(--line); background: var(--panel-2); }
+  .mtabbar div { flex: 1; text-align: center; padding: 9px 0 12px; font-size: 9.5px; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .mtabbar div.on { color: var(--brand); font-weight: 650; }
+  .mtabbar svg { width: 18px; height: 18px; }
+
+  .statuscard { border: 1px solid var(--line); border-radius: 14px; background: var(--panel-2); padding: 14px; margin-bottom: 8px; }
+  .statuscard .t { color: var(--ink); font-weight: 650; font-size: 14px; }
+  .statuscard .s { font-size: 12px; margin-top: 3px; }
+  .punch { margin: 26px auto 14px; width: 176px; height: 176px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 21px;
+    background: radial-gradient(circle at 32% 28%, color-mix(in oklab, var(--brand) 85%, white 15%), var(--brand-deep)); box-shadow: 0 18px 40px -14px color-mix(in oklab, var(--brand) 60%, transparent), inset 0 2px 8px rgba(255,255,255,.25); border: 6px solid color-mix(in oklab, var(--brand) 25%, var(--panel)); }
+  .punch.out { background: radial-gradient(circle at 32% 28%, #f26d6d, #b91c1c); box-shadow: 0 18px 40px -14px rgba(220,38,38,.5), inset 0 2px 8px rgba(255,255,255,.25); border-color: rgba(220,38,38,.25); }
+  .punch small { display:block; font-size: 11px; font-weight: 600; opacity: .85; margin-top: 4px; }
+  .bio { text-align: center; color: var(--muted); font-size: 11.5px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+  .mlist { display: flex; flex-direction: column; gap: 8px; }
+  .mitem { border: 1px solid var(--line); border-radius: 11px; background: var(--panel); padding: 10px 12px; }
+  .mitem .r1 { display: flex; align-items: center; justify-content: space-between; }
+  .mitem b { color: var(--ink); font-size: 13px; }
+  .mitem small { color: var(--muted); font-size: 11.5px; }
+  .msec { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin: 14px 2px 8px; font-weight: 650; }
+  .approve { display: flex; gap: 6px; margin-top: 8px; }
+  .mini { border: 0; border-radius: 7px; padding: 6px 10px; font: inherit; font-size: 11.5px; font-weight: 650; cursor: default; }
+  .mini.ok { background: var(--ok); color: #fff; } .mini.no { background: var(--panel); color: var(--bad); border: 1px solid var(--bad); }
+
+  .footnote { margin-top: 26px; font-size: 12.5px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
+  .footnote code { font-family: var(--mono); font-size: 11.5px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--body); }
+  .kbd { display:inline-block; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <circle cx="12" cy="13" r="7.2"/><path d="M12 13V8.4"/><path d="M12 13l3 1.6"/><path d="M9 2.6h6"/>
+        </svg>
+      </div>
+      <div>
+        <h1>GenTime</h1>
+        <p>Attendance &amp; HR · MVP screen demo</p>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle color theme">
+      <span id="themeIcon">◐</span><span id="themeLabel">Theme</span>
+    </button>
+  </header>
+
+  <h2 class="lede">Sample screens from the built MVP</h2>
+  <p class="sub">Mockups of the real GenTime UI, populated with the demo dataset that was verified end-to-end against Postgres — Ela checks in 30 minutes late, Ben checks in outside the HQ geofence, Cora is on approved leave. Switch surfaces and pages below.</p>
+
+  <div class="seg" role="tablist" aria-label="Surface">
+    <button role="tab" id="tab-web" aria-selected="true" aria-controls="web">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>
+      Web dashboard
+    </button>
+    <button role="tab" id="tab-mobile" aria-selected="false" aria-controls="mobile">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>
+      Mobile app
+    </button>
+  </div>
+
+  <!-- ==================== WEB ==================== -->
+  <section class="surface active" id="web" role="tabpanel" aria-labelledby="tab-web">
+    <div class="browser">
+      <div class="chrome">
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="url">app.gentime.dev/today</div>
+      </div>
+      <div class="app">
+        <aside class="side">
+          <div class="who"><b>Ada Admin</b><span>admin</span></div>
+          <nav class="nav" role="tablist" aria-label="Dashboard pages">
+            <button role="tab" data-page="today" aria-selected="true">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg> Today
+            </button>
+            <button role="tab" data-page="map" aria-selected="false">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3 3 5v16l6-2 6 2 6-2V3l-6 2-6-2Z"/><path d="M9 3v16M15 5v16"/></svg> Live Map
+            </button>
+            <button role="tab" data-page="attendance" aria-selected="false">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v16H4z"/><path d="M4 10h16M9 5v16"/></svg> Attendance
+            </button>
+            <button role="tab" data-page="leave" aria-selected="false">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h4"/></svg> Leave Approvals
+            </button>
+            <button role="tab" data-page="alerts" aria-selected="false">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3l9-16Z"/><path d="M12 10v4M12 17v.5"/></svg> Alerts
+            </button>
+            <button role="tab" data-page="reports" aria-selected="false">
+              <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V6M10 20V4M16 20v-8M22 20H2"/></svg> Reports
+            </button>
+          </nav>
+          <button class="nav" style="flex:0"><span class="signout" style="padding:9px 11px">Sign out</span></button>
+        </aside>
+
+        <div class="view">
+          <!-- Today -->
+          <div class="page active" data-page="today">
+            <h2>Today</h2>
+            <p class="date">Thursday, 16 July 2026 · HQ — Makati &amp; Warehouse — Pasig</p>
+            <div class="board">
+              <div class="col"><header><span class="chip ok">present</span><span class="big tnum">2</span></header>
+                <ul><li>Dan Rivera</li><li>Mia Santos</li></ul></div>
+              <div class="col"><header><span class="chip late">late</span><span class="big tnum">1</span></header>
+                <ul><li>Ela Employee <span class="lt">+30m</span></li></ul></div>
+              <div class="col"><header><span class="chip bad">absent</span><span class="big tnum">1</span></header>
+                <ul><li>Ben Employee</li></ul></div>
+              <div class="col"><header><span class="chip leave">on leave</span><span class="big tnum">1</span></header>
+                <ul><li>Cora Employee</li></ul></div>
+              <div class="col"><header><span class="chip idle">incomplete</span><span class="big tnum">1</span></header>
+                <ul><li>Noel Cruz</li></ul></div>
+            </div>
+            <div class="row" style="margin-top:16px">
+              <div class="lead"><div class="sev bad" aria-hidden="true"></div>
+                <div><b>Missed check-in flag</b><br><small>Ben Employee — shift started 09:00, grace elapsed at 09:10</small></div></div>
+              <span class="chip bad">needs review</span>
+            </div>
+          </div>
+
+          <!-- Live Map -->
+          <div class="page" data-page="map">
+            <h2>Live Map</h2>
+            <p class="date">Real-time pings via Supabase Realtime · marker colour = inside / outside geofence</p>
+            <div class="map">
+              <div class="grid" aria-hidden="true"></div>
+              <div class="road" style="left:0;right:0;top:38%;height:10px"></div>
+              <div class="road" style="top:0;bottom:0;left:56%;width:10px"></div>
+              <div class="road" style="left:8%;right:30%;top:70%;height:7px;transform:rotate(-8deg)"></div>
+              <div class="geofence" style="left:16%;top:20%;width:190px;height:190px"><span>HQ — Makati · 100 m</span></div>
+              <div class="geofence" style="right:9%;bottom:12%;width:150px;height:150px"><span>Warehouse · 150 m</span></div>
+              <div class="pin in" style="left:27%;top:34%" title="Dan Rivera — inside"></div>
+              <div class="pin in" style="left:22%;top:46%" title="Mia Santos — inside"></div>
+              <div class="pin in" style="right:20%;bottom:22%" title="Ela Employee — inside"></div>
+              <div class="pin out" style="left:62%;top:24%" title="Ben Employee — outside HQ"></div>
+              <div class="legend" aria-hidden="true">
+                <div><i style="background:var(--ok)"></i> Inside geofence</div>
+                <div><i style="background:var(--bad)"></i> Outside geofence</div>
+                <div><i style="background:var(--brand);border-radius:2px"></i> Site radius</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance -->
+          <div class="page" data-page="attendance">
+            <h2>Attendance — DTR</h2>
+            <p class="date">Daily time records · admin can post a manual correction with an audit note</p>
+            <div class="toolbar">
+              <div class="field"><label>From</label><input class="pill-input mono" value="2026-07-13" readonly></div>
+              <div class="field"><label>To</label><input class="pill-input mono" value="2026-07-16" readonly></div>
+              <div class="field"><label>&nbsp;</label><button class="btn">Apply</button></div>
+            </div>
+            <div class="card"><table class="tbl">
+              <thead><tr><th>Date</th><th>Employee</th><th>First in</th><th>Last out</th><th>Worked</th><th>Late</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">2026-07-16</td><td>Ela Employee</td><td class="mono">09:40</td><td class="mono">18:05</td><td class="mono">8h 25m</td><td class="mono lt" style="color:var(--late-ink)">30m</td><td><span class="chip late">late</span></td></tr>
+                <tr><td class="mono">2026-07-16</td><td>Dan Rivera</td><td class="mono">08:57</td><td class="mono">18:02</td><td class="mono">9h 05m</td><td class="mono">—</td><td><span class="chip ok">present</span></td></tr>
+                <tr><td class="mono">2026-07-16</td><td>Cora Employee</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td><span class="chip leave">on leave</span></td></tr>
+                <tr><td class="mono">2026-07-16</td><td>Ben Employee</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td><span class="chip bad">absent</span></td></tr>
+                <tr><td class="mono">2026-07-16</td><td>Noel Cruz</td><td class="mono">09:03</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td><span class="chip idle">incomplete</span></td></tr>
+              </tbody>
+            </table></div>
+          </div>
+
+          <!-- Leave -->
+          <div class="page" data-page="leave">
+            <h2>Leave Approvals</h2>
+            <p class="date">Pending queue · one-click approve / reject · employee is notified by FCM</p>
+            <div class="rows">
+              <div class="row">
+                <div class="lead"><div class="sev brand" aria-hidden="true"></div>
+                  <div><b>Cora Employee <span class="chip leave" style="margin-left:6px">vacation</span></b><br>
+                  <small class="mono">2026-07-16 → 2026-07-18</small> · <small>Family trip, filed 2 days ago</small></div></div>
+                <div style="display:flex;gap:8px"><button class="btn">Approve</button><button class="btn ghost">Reject</button></div>
+              </div>
+              <div class="row">
+                <div class="lead"><div class="sev late" aria-hidden="true"></div>
+                  <div><b>Noel Cruz <span class="chip late" style="margin-left:6px">sick</span></b><br>
+                  <small class="mono">2026-07-17 → 2026-07-17</small> · <small>Medical appointment</small></div></div>
+                <div style="display:flex;gap:8px"><button class="btn">Approve</button><button class="btn ghost">Reject</button></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerts -->
+          <div class="page" data-page="alerts">
+            <h2>Alerts</h2>
+            <p class="date">Unacknowledged · supervisors acknowledge; raised server-side by the monitors</p>
+            <div class="rows">
+              <div class="row">
+                <div class="lead"><div class="sev bad" aria-hidden="true"></div>
+                  <div><b>Wrong-location check-in</b><br><small>Ben Employee · 09:41 · 1.4 km from HQ — Makati</small></div></div>
+                <button class="btn ghost">Acknowledge</button>
+              </div>
+              <div class="row">
+                <div class="lead"><div class="sev bad" aria-hidden="true"></div>
+                  <div><b>Left geofence while on-the-clock</b><br><small>Ben Employee · 10:05 · last ping outside radius</small></div></div>
+                <button class="btn ghost">Acknowledge</button>
+              </div>
+              <div class="row">
+                <div class="lead"><div class="sev late" aria-hidden="true"></div>
+                  <div><b>Missed check-in</b><br><small>Ben Employee · 09:10 · grace elapsed, no check-in</small></div></div>
+                <button class="btn ghost">Acknowledge</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reports -->
+          <div class="page" data-page="reports">
+            <h2>Reports</h2>
+            <p class="date">Payroll-ready summary · export CSV / XLSX</p>
+            <div class="toolbar">
+              <div class="field"><label>From</label><input class="pill-input mono" value="2026-07-01" readonly></div>
+              <div class="field"><label>To</label><input class="pill-input mono" value="2026-07-16" readonly></div>
+              <div class="field"><label>&nbsp;</label><button class="btn">Run report</button></div>
+              <div class="field"><label>&nbsp;</label><button class="btn ghost">Export CSV</button></div>
+              <div class="field"><label>&nbsp;</label><button class="btn ghost">Export XLSX</button></div>
+            </div>
+            <div class="card"><table class="tbl">
+              <thead><tr><th>Code</th><th>Name</th><th>Present</th><th>Late</th><th>Late min</th><th>Absent</th><th>On leave</th><th>Hours</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">GT-0003</td><td>Ela Employee</td><td class="mono">11</td><td class="mono">3</td><td class="mono">74</td><td class="mono">0</td><td class="mono">1</td><td class="mono">96.4</td></tr>
+                <tr><td class="mono">GT-0004</td><td>Ben Employee</td><td class="mono">9</td><td class="mono">1</td><td class="mono">12</td><td class="mono">2</td><td class="mono">0</td><td class="mono">80.1</td></tr>
+                <tr><td class="mono">GT-0005</td><td>Cora Employee</td><td class="mono">10</td><td class="mono">0</td><td class="mono">0</td><td class="mono">0</td><td class="mono">3</td><td class="mono">88.0</td></tr>
+                <tr><td class="mono">GT-0006</td><td>Dan Rivera</td><td class="mono">12</td><td class="mono">0</td><td class="mono">0</td><td class="mono">0</td><td class="mono">0</td><td class="mono">108.3</td></tr>
+                <tr><td class="mono">GT-0007</td><td>Noel Cruz</td><td class="mono">10</td><td class="mono">2</td><td class="mono">41</td><td class="mono">1</td><td class="mono">1</td><td class="mono">89.7</td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== MOBILE ==================== -->
+  <section class="surface" id="mobile" role="tabpanel" aria-labelledby="tab-mobile">
+    <div class="phones">
+      <!-- Punch -->
+      <div class="phone">
+        <div class="device"><div class="glass">
+          <div class="notch" aria-hidden="true"></div>
+          <div class="statusbar mono"><span>9:41</span><span>5G ▪ 84%</span></div>
+          <div class="mbody">
+            <div class="mtitle">Home</div>
+            <div class="statuscard">
+              <div class="t">You're on the clock</div>
+              <div class="s" style="color:var(--ok-ink)">Since 09:40 · today 8h 25m</div>
+            </div>
+            <div class="statuscard" style="background:var(--panel)">
+              <div class="s" style="color:var(--late-ink)">⬆ 2 punches pending sync — queued offline</div>
+            </div>
+            <div class="punch out">Check Out<small>tap &amp; verify</small></div>
+            <div class="bio">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 11a4 4 0 0 1 4 4v2"/><path d="M8 15v2M5 12a8 8 0 0 1 14 0"/></svg>
+              Fingerprint / Face confirms every punch
+            </div>
+          </div>
+          <div class="mtabbar" aria-hidden="true">
+            <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>Attend</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 9h6"/></svg>Leave</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Team</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Settings</div>
+          </div>
+        </div></div>
+        <p class="cap">Punch screen — biometric + GPS, offline-queued</p>
+      </div>
+
+      <!-- My Attendance -->
+      <div class="phone">
+        <div class="device"><div class="glass">
+          <div class="notch" aria-hidden="true"></div>
+          <div class="statusbar mono"><span>9:41</span><span>5G ▪ 84%</span></div>
+          <div class="mbody">
+            <div class="mtitle">My Attendance</div>
+            <div class="mlist">
+              <div class="mitem"><div class="r1"><b>Thu · Jul 16</b><span class="chip late">late</span></div>
+                <small class="mono">09:40 → 18:05 · 8h 25m · 30m late</small></div>
+              <div class="mitem"><div class="r1"><b>Wed · Jul 15</b><span class="chip ok">present</span></div>
+                <small class="mono">08:58 → 18:03 · 9h 05m</small></div>
+              <div class="mitem"><div class="r1"><b>Tue · Jul 14</b><span class="chip ok">present</span></div>
+                <small class="mono">08:55 → 18:00 · 9h 05m</small></div>
+              <div class="mitem"><div class="r1"><b>Mon · Jul 13</b><span class="chip late">late</span></div>
+                <small class="mono">09:22 → 18:10 · 8h 48m · 12m late</small></div>
+              <div class="mitem"><div class="r1"><b>Fri · Jul 10</b><span class="chip ok">present</span></div>
+                <small class="mono">08:51 → 18:04 · 9h 13m</small></div>
+              <div class="mitem"><div class="r1"><b>Thu · Jul 09</b><span class="chip leave">on leave</span></div>
+                <small>Vacation — approved</small></div>
+            </div>
+          </div>
+          <div class="mtabbar" aria-hidden="true">
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</div>
+            <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>Attend</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 9h6"/></svg>Leave</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Team</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Settings</div>
+          </div>
+        </div></div>
+        <p class="cap">My Attendance — personal DTR history</p>
+      </div>
+
+      <!-- Supervisor -->
+      <div class="phone">
+        <div class="device"><div class="glass">
+          <div class="notch" aria-hidden="true"></div>
+          <div class="statusbar mono"><span>9:41</span><span>5G ▪ 84%</span></div>
+          <div class="mbody">
+            <div class="mtitle">Team</div>
+            <div class="msec">Team today</div>
+            <div class="mlist">
+              <div class="mitem"><div class="r1"><b>Ela Employee</b><span class="chip late">late +30m</span></div></div>
+              <div class="mitem"><div class="r1"><b>Cora Employee</b><span class="chip leave">on leave</span></div></div>
+              <div class="mitem"><div class="r1"><b>Ben Employee</b><span class="chip bad">absent</span></div></div>
+            </div>
+            <div class="msec">Alerts</div>
+            <div class="mitem"><div class="r1"><b>Wrong-location check-in</b><span class="chip bad">new</span></div>
+              <small>Ben Employee · 1.4 km from HQ</small></div>
+            <div class="msec">Leave approvals</div>
+            <div class="mitem">
+              <div class="r1"><b>Cora · vacation</b></div>
+              <small class="mono">Jul 16 → Jul 18</small>
+              <div class="approve"><span class="mini ok">Approve</span><span class="mini no">Reject</span></div>
+            </div>
+          </div>
+          <div class="mtabbar" aria-hidden="true">
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg>Attend</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h14v16H5z"/><path d="M9 9h6"/></svg>Leave</div>
+            <div class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>Team</div>
+            <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Settings</div>
+          </div>
+        </div></div>
+        <p class="cap">Supervisor tab — team, alerts, approvals</p>
+      </div>
+    </div>
+
+    <p class="footnote">
+      <span aria-hidden="true">ℹ️</span>
+      <span>Role-gated: employees see Home / Attendance / Leave / Settings; the <b>Team</b> tab appears only for supervisors and admins. Demo accounts sign in with <code>Password123!</code> — e.g. <code>emp1@gentime.dev</code>, <code>sup@gentime.dev</code>, <code>admin@gentime.dev</code>.</span>
+    </p>
+  </section>
+</div>
+
+<script>
+  // Theme toggle (persists nothing — demo only).
+  const root = document.documentElement;
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  function syncLabel() {
+    const dark = getComputedStyle(root).getPropertyValue('--ground').trim().startsWith('#07')
+      || root.getAttribute('data-theme') === 'dark'
+      || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    icon.textContent = dark ? '☾' : '☀';
+    label.textContent = dark ? 'Dark' : 'Light';
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme')
+      || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    syncLabel();
+  });
+  syncLabel();
+
+  // Surface switch
+  const surfaces = { web: document.getElementById('web'), mobile: document.getElementById('mobile') };
+  document.querySelectorAll('.seg [role=tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.seg [role=tab]').forEach(b => b.setAttribute('aria-selected', 'false'));
+      btn.setAttribute('aria-selected', 'true');
+      Object.values(surfaces).forEach(s => s.classList.remove('active'));
+      surfaces[btn.id === 'tab-web' ? 'web' : 'mobile'].classList.add('active');
+    });
+  });
+
+  // Dashboard page switch
+  const url = document.querySelector('.url');
+  document.querySelectorAll('.nav [data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const page = btn.dataset.page;
+      document.querySelectorAll('.nav [data-page]').forEach(b => b.setAttribute('aria-selected', 'false'));
+      btn.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.view .page').forEach(p => p.classList.toggle('active', p.dataset.page === page));
+      url.textContent = 'app.gentime.dev/' + page;
+    });
+  });
+</script>

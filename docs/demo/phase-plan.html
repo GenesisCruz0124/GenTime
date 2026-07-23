@@ -1,0 +1,369 @@
+<title>GenTime — Phase Plan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --brand:#2563eb; --brand-deep:#1e40af; --brand-soft:#dbe6fe;
+    --ink:#0e1729; --body:#33415a; --muted:#64748b;
+    --line:#e2e8f0; --line-soft:#eef2f7; --ground:#f4f7fb; --panel:#fff; --panel-2:#f8fafc;
+    --shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.18);
+    --shadow-lg:0 24px 60px -24px rgba(15,23,42,.35);
+    --ok:#16a34a; --ok-bg:#dcfce7; --ok-ink:#166534;
+    --part:#d97706; --part-bg:#fef3c7; --part-ink:#92400e;
+    --todo:#64748b; --todo-bg:#e9eef5; --todo-ink:#475569;
+    --bad:#dc2626; --bad-bg:#fee2e2; --bad-ink:#991b1b;
+    --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono","Roboto Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --brand:#5b8cff; --brand-deep:#3b6be0; --brand-soft:#16233f;
+      --ink:#eaf0fb; --body:#b7c2d6; --muted:#8593ab;
+      --line:#1e293b; --line-soft:#17202f; --ground:#070b14; --panel:#0e1526; --panel-2:#0b1220;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);
+      --shadow-lg:0 30px 70px -28px rgba(0,0,0,.75);
+      --ok-bg:#10281a; --ok-ink:#6ee7a5; --part-bg:#2b2008; --part-ink:#fbbf5a;
+      --todo-bg:#141c2b; --todo-ink:#94a3b8; --bad-bg:#2c1214; --bad-ink:#fca5a5;
+    }
+  }
+  :root[data-theme="light"]{--brand:#2563eb;--brand-deep:#1e40af;--brand-soft:#dbe6fe;--ink:#0e1729;--body:#33415a;--muted:#64748b;--line:#e2e8f0;--line-soft:#eef2f7;--ground:#f4f7fb;--panel:#fff;--panel-2:#f8fafc;--shadow:0 1px 2px rgba(15,23,42,.06),0 8px 24px -12px rgba(15,23,42,.18);--shadow-lg:0 24px 60px -24px rgba(15,23,42,.35);--ok-bg:#dcfce7;--ok-ink:#166534;--part-bg:#fef3c7;--part-ink:#92400e;--todo-bg:#e9eef5;--todo-ink:#475569;--bad-bg:#fee2e2;--bad-ink:#991b1b;}
+  :root[data-theme="dark"]{--brand:#5b8cff;--brand-deep:#3b6be0;--brand-soft:#16233f;--ink:#eaf0fb;--body:#b7c2d6;--muted:#8593ab;--line:#1e293b;--line-soft:#17202f;--ground:#070b14;--panel:#0e1526;--panel-2:#0b1220;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.6);--shadow-lg:0 30px 70px -28px rgba(0,0,0,.75);--ok-bg:#10281a;--ok-ink:#6ee7a5;--part-bg:#2b2008;--part-ink:#fbbf5a;--todo-bg:#141c2b;--todo-ink:#94a3b8;--bad-bg:#2c1214;--bad-ink:#fca5a5;}
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--body); font-family:var(--sans); line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 34px 22px 80px; }
+  .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  header.top { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .logo { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; background:linear-gradient(150deg,var(--brand),var(--brand-deep)); color:#fff; box-shadow:var(--shadow); }
+  .logo svg { width:22px; height:22px; }
+  .brand h1 { margin:0; font-size:19px; letter-spacing:-.02em; color:var(--ink); font-weight:700; }
+  .brand p { margin:0; font-size:12.5px; color:var(--muted); }
+  .theme-btn { border:1px solid var(--line); background:var(--panel); color:var(--body); border-radius:999px; padding:8px 14px; font:inherit; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+  .theme-btn:hover { border-color:var(--brand); color:var(--ink); }
+  .theme-btn:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+
+  .hero { margin: 30px 0 6px; }
+  .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.14em; color:var(--brand); font-weight:700; }
+  .hero h2 { margin:8px 0 6px; font-size:34px; line-height:1.1; letter-spacing:-.03em; color:var(--ink); font-weight:780; text-wrap:balance; max-width:18ch; }
+  .hero p { margin:0; max-width:64ch; color:var(--muted); font-size:15.5px; }
+
+  .legend { display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 8px; }
+  .badge { display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:650; padding:5px 11px; border-radius:999px; }
+  .badge::before { content:""; width:8px; height:8px; border-radius:50%; background:currentColor; }
+  .badge.ok { background:var(--ok-bg); color:var(--ok-ink); }
+  .badge.part { background:var(--part-bg); color:var(--part-ink); }
+  .badge.todo { background:var(--todo-bg); color:var(--todo-ink); }
+
+  section.block { margin-top: 34px; }
+  .h3 { display:flex; align-items:baseline; gap:10px; margin:0 0 14px; }
+  .h3 .n { font-family:var(--mono); font-size:12px; color:var(--brand); font-weight:700; }
+  .h3 h3 { margin:0; font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink); font-weight:700; }
+  .rule { height:1px; background:var(--line); margin:0 0 14px; }
+
+  /* snapshot table */
+  .snap { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--panel); box-shadow:var(--shadow); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th { text-align:left; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; padding:11px 14px; border-bottom:1px solid var(--line); background:var(--panel-2); }
+  td { padding:12px 14px; border-bottom:1px solid var(--line-soft); color:var(--body); vertical-align:middle; }
+  tr:last-child td { border-bottom:0; }
+  td.area { color:var(--ink); font-weight:600; white-space:nowrap; }
+  .st { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:650; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .st::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .st.ok { background:var(--ok-bg); color:var(--ok-ink); }
+  .st.part { background:var(--part-bg); color:var(--part-ink); }
+  .st.todo { background:var(--todo-bg); color:var(--todo-ink); }
+
+  /* phase timeline */
+  .timeline { position:relative; margin-top: 6px; padding-left: 34px; }
+  .timeline::before { content:""; position:absolute; left:13px; top:8px; bottom:8px; width:2px; background:linear-gradient(var(--brand), var(--line)); }
+  .phase { position:relative; margin-bottom:16px; }
+  .phase .dot { position:absolute; left:-34px; top:20px; width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-family:var(--mono); font-size:12px; font-weight:700; color:#fff; background:var(--brand); box-shadow:0 0 0 4px var(--ground); }
+  .phase.is-todo .dot { background:var(--todo-ink); }
+  .phase.is-done .dot { background:var(--ok); }
+  .card { border:1px solid var(--line); border-radius:14px; background:var(--panel); box-shadow:var(--shadow); overflow:hidden; }
+  .card > .head { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; }
+  .card .title { display:flex; flex-direction:column; gap:2px; }
+  .card .title b { color:var(--ink); font-size:16px; letter-spacing:-.01em; }
+  .card .title small { color:var(--muted); font-size:12px; }
+  .card .body { padding:0 16px 15px; display:grid; gap:12px; }
+  @media (min-width:620px){ .card .body { grid-template-columns:1fr 1fr; } .card .body .exit { grid-column:1 / -1; } }
+  .list { border:1px solid var(--line-soft); border-radius:11px; background:var(--panel-2); padding:11px 13px; }
+  .list h4 { margin:0 0 8px; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:700; }
+  .list ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+  .list li { display:flex; gap:9px; font-size:13px; color:var(--body); align-items:flex-start; }
+  .list li .m { flex:0 0 auto; margin-top:1px; font-size:12px; }
+  .m.ok { color:var(--ok); } .m.part { color:var(--part); } .m.todo { color:var(--todo-ink); }
+  .exit { border:1px dashed color-mix(in oklab, var(--brand) 45%, var(--line)); background:color-mix(in oklab, var(--brand) 6%, var(--panel)); border-radius:11px; padding:11px 13px; }
+  .exit h4 { margin:0 0 4px; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--brand); font-weight:700; }
+  .exit p { margin:0; font-size:13px; color:var(--body); }
+
+  .cadence { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px; color:var(--body); background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 15px; }
+  .cadence .step { background:var(--brand-soft); color:var(--brand-deep); border-radius:8px; padding:4px 10px; font-weight:650; font-size:12.5px; }
+  :root[data-theme="dark"] .cadence .step, @media (prefers-color-scheme:dark){ .cadence .step { color:#cfe0ff; } }
+  .cadence .arw { color:var(--muted); }
+
+  .two { display:grid; gap:14px; }
+  @media (min-width:620px){ .two { grid-template-columns:1fr 1fr; } }
+  .mini { border:1px solid var(--line); border-radius:13px; background:var(--panel); padding:14px 16px; box-shadow:var(--shadow); }
+  .mini h4 { margin:0 0 9px; font-size:13px; color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .mini ol, .mini ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:7px; font-size:13px; color:var(--body); }
+  .mini.risk h4 { color:var(--bad-ink); }
+  .mini.risk li::marker { color:var(--bad); }
+
+  .next { margin-top:30px; border:1px solid var(--brand); border-radius:14px; background:linear-gradient(150deg, color-mix(in oklab,var(--brand) 10%, var(--panel)), var(--panel)); padding:18px 20px; display:flex; gap:14px; align-items:flex-start; }
+  .next .k { width:34px; height:34px; border-radius:9px; background:var(--brand); color:#fff; display:grid; place-items:center; flex:0 0 auto; }
+  .next b { color:var(--ink); }
+  .next p { margin:4px 0 0; font-size:14px; }
+
+  footer { margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  code { font-family:var(--mono); font-size:12px; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; color:var(--body); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="7.2"/><path d="M12 13V8.4"/><path d="M12 13l3 1.6"/><path d="M9 2.6h6"/></svg>
+      </div>
+      <div><h1>GenTime</h1><p>Attendance &amp; HR · Android MVP</p></div>
+    </div>
+    <button class="theme-btn" id="themeToggle" aria-label="Toggle color theme"><span id="themeIcon">◐</span><span id="themeLabel">Theme</span></button>
+  </header>
+
+  <div class="hero">
+    <div class="eyebrow">Delivery plan</div>
+    <h2>From built code to a shippable MVP</h2>
+    <p>The four spec phases are already largely implemented and the backend is verified end-to-end against Postgres. This plan tracks what remains — provisioning, first compile, live wiring, and release — with clear exit criteria for each phase.</p>
+    <div class="legend" aria-label="Status legend">
+      <span class="badge ok">Done</span>
+      <span class="badge part">Partial / needs wiring</span>
+      <span class="badge todo">Not started</span>
+    </div>
+  </div>
+
+  <!-- Snapshot -->
+  <section class="block">
+    <div class="h3"><span class="n">01</span><h3>Status snapshot — today</h3></div>
+    <div class="snap"><table>
+      <thead><tr><th>Area</th><th>State</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="area">DB schema + RLS</td><td><span class="st ok">Done</span></td><td>Verified on Postgres 16 — isolation, geofence, DTR, reports</td></tr>
+        <tr><td class="area">Business-logic RPCs</td><td><span class="st ok">Done</span></td><td>Attendance, DTR, monitors, report summary</td></tr>
+        <tr><td class="area">Edge Functions (Deno)</td><td><span class="st ok">Done</span></td><td>RPC wrappers + notify + provision_employee</td></tr>
+        <tr><td class="area">Seed data</td><td><span class="st ok">Done</span></td><td>Demo org, sites, 5 accounts, shifts</td></tr>
+        <tr><td class="area">Web dashboard</td><td><span class="st part">Partial</span></td><td>Builds clean; needs a live Supabase project to run</td></tr>
+        <tr><td class="area">Android app</td><td><span class="st part">Partial</span></td><td>Written for supabase-kt 3.6.0; not yet compiled</td></tr>
+        <tr><td class="area">CI (web + android)</td><td><span class="st part">Partial</span></td><td>Workflow present; unproven until first run</td></tr>
+        <tr><td class="area">Release (signed APK)</td><td><span class="st part">Partial</span></td><td>Present; needs keystore + GitHub secrets</td></tr>
+        <tr><td class="area">Firebase / FCM</td><td><span class="st todo">Not started</span></td><td>google-services.json is a placeholder</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- Cadence -->
+  <section class="block">
+    <div class="h3"><span class="n">02</span><h3>Cadence per phase</h3></div>
+    <div class="cadence">
+      <span class="step">Plan-first approval</span><span class="arw">→</span>
+      <span class="step">Build</span><span class="arw">→</span>
+      <span class="step">verify-implementation pass</span><span class="arw">→</span>
+      <span class="step">Next phase</span>
+      <span style="color:var(--muted);margin-left:auto;font-size:12.5px">allow-once-approver active throughout</span>
+    </div>
+  </section>
+
+  <!-- Phases -->
+  <section class="block">
+    <div class="h3"><span class="n">03</span><h3>Phases</h3></div>
+    <div class="timeline">
+
+      <!-- Phase 0 -->
+      <div class="phase is-todo">
+        <div class="dot">0</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>Environment &amp; provisioning</b><small>Prerequisite · ~0.5 day</small></div><span class="st todo">Not started</span></div>
+          <div class="body">
+            <div class="list"><h4>Work</h4><ul>
+              <li><span class="m todo">○</span> Create Supabase project; capture URL + keys</li>
+              <li><span class="m todo">○</span> Apply migrations + seed to a non-prod project</li>
+              <li><span class="m todo">○</span> Enable <code>pg_cron</code> + <code>pg_net</code></li>
+              <li><span class="m todo">○</span> Firebase project; real <code>google-services.json</code></li>
+              <li><span class="m todo">○</span> Keystore + GitHub secrets</li>
+            </ul></div>
+            <div class="list"><h4>Why</h4><ul>
+              <li><span class="m todo">○</span> Scheduled monitors need pg_cron</li>
+              <li><span class="m todo">○</span> Push dispatch needs pg_net + FCM creds</li>
+              <li><span class="m todo">○</span> Signed release needs the keystore</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>Migrations applied to a live project; web dashboard loads against it; a debug APK reaches the login screen.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 1 -->
+      <div class="phase is-done">
+        <div class="dot">1</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>Backend foundation</b><small>Schema · RLS · Auth · Edge Fns · web CRUD</small></div><span class="st ok">Code complete</span></div>
+          <div class="body">
+            <div class="list"><h4>Built</h4><ul>
+              <li><span class="m ok">✓</span> Schema, RLS, seed, RPCs</li>
+              <li><span class="m ok">✓</span> Edge Functions</li>
+              <li><span class="m ok">✓</span> Web login + Employees &amp; Sites CRUD</li>
+            </ul></div>
+            <div class="list"><h4>Remaining</h4><ul>
+              <li><span class="m part">◐</span> Run against live project</li>
+              <li><span class="m part">◐</span> Confirm RLS with real JWTs</li>
+              <li><span class="m part">◐</span> Deploy functions; schedule cron</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>Admin signs in, provisions an employee + site, and the row appears under the correct RLS scope.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="phase">
+        <div class="dot">2</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>Mobile core</b><small>Login · device binding · punch · offline queue · sync</small></div><span class="st part">Compile &amp; wire</span></div>
+          <div class="body">
+            <div class="list"><h4>Built</h4><ul>
+              <li><span class="m ok">✓</span> All screens + biometric punch</li>
+              <li><span class="m ok">✓</span> Room queue + WorkManager sync</li>
+              <li><span class="m ok">✓</span> Device binding</li>
+            </ul></div>
+            <div class="list"><h4>Remaining</h4><ul>
+              <li><span class="m todo">○</span> First Android compile in CI</li>
+              <li><span class="m todo">○</span> Fix any supabase-kt 3.6.0 deltas</li>
+              <li><span class="m todo">○</span> On-device: biometric, GPS, offline→sync</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>An employee checks in offline, regains network, and the event lands exactly once (idempotent) with the correct geofence flag.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="phase">
+        <div class="dot">3</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>Live ops</b><small>Tracking service · live map · monitors · FCM</small></div><span class="st part">Wire push</span></div>
+          <div class="body">
+            <div class="list"><h4>Built</h4><ul>
+              <li><span class="m ok">✓</span> Foreground tracking + pings</li>
+              <li><span class="m ok">✓</span> Live map (Realtime)</li>
+              <li><span class="m ok">✓</span> Geofence + missed-check-in monitors</li>
+            </ul></div>
+            <div class="list"><h4>Remaining</h4><ul>
+              <li><span class="m todo">○</span> Verify 5-min ping cadence on device</li>
+              <li><span class="m todo">○</span> End-to-end FCM to supervisor</li>
+              <li><span class="m part">◐</span> Confirm monitor cron in live project</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>An on-the-clock employee leaving the geofence produces a map colour change <em>and</em> a push to their supervisor within one monitor cycle.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="phase">
+        <div class="dot">4</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>DTR, leave &amp; reports</b><small>Nightly DTR · leave flows · Today board · exports</small></div><span class="st part">Validate flows</span></div>
+          <div class="body">
+            <div class="list"><h4>Built</h4><ul>
+              <li><span class="m ok">✓</span> DTR compute (lateness + on-leave verified)</li>
+              <li><span class="m ok">✓</span> Leave filing/approvals both surfaces</li>
+              <li><span class="m ok">✓</span> Today board + CSV/XLSX export</li>
+            </ul></div>
+            <div class="list"><h4>Remaining</h4><ul>
+              <li><span class="m todo">○</span> Validate nightly compute schedule</li>
+              <li><span class="m todo">○</span> Leave decision → employee push</li>
+              <li><span class="m todo">○</span> DTR correction audit note</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>A full day of punches produces a correct DTR row overnight; a payroll export matches the DTR for the period.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="phase is-todo">
+        <div class="dot">5</div>
+        <div class="card">
+          <div class="head"><div class="title"><b>Hardening &amp; first release</b><small>~1–2 days</small></div><span class="st todo">Not started</span></div>
+          <div class="body">
+            <div class="list"><h4>Work</h4><ul>
+              <li><span class="m todo">○</span> verify-implementation across all phases</li>
+              <li><span class="m todo">○</span> Security review + Supabase advisors clean</li>
+              <li><span class="m todo">○</span> Tag <code>v1.0.0</code> → signed APK + Release</li>
+            </ul></div>
+            <div class="list"><h4>Checks</h4><ul>
+              <li><span class="m todo">○</span> RLS on every table</li>
+              <li><span class="m todo">○</span> Service-role key never client-shipped</li>
+              <li><span class="m todo">○</span> <code>enable_signup=false</code> confirmed</li>
+            </ul></div>
+            <div class="exit"><h4>Exit criteria</h4><p>Signed <code>GenTime-v1.0.0.apk</code> from CI installs and runs the full happy path against the production Supabase project.</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Cross-cutting + risks -->
+  <section class="block">
+    <div class="h3"><span class="n">04</span><h3>Cross-cutting &amp; risks</h3></div>
+    <div class="two">
+      <div class="mini">
+        <h4>Cross-cutting workstreams</h4>
+        <ul>
+          <li>Time integrity — drift &gt; 10 min already flagged server-side</li>
+          <li>Retention — 7-day ping purge verified; confirm daily cron</li>
+          <li>Observability — wire Supabase + function logs, monitor health</li>
+          <li>Accessibility &amp; i18n pass (web + app)</li>
+        </ul>
+      </div>
+      <div class="mini risk">
+        <h4>Known risks</h4>
+        <ol>
+          <li>Android not yet compiled — first build likely surfaces small API fixes</li>
+          <li>Firebase placeholder — FCM inert until real credentials</li>
+          <li>pg_cron / pg_net must be enabled for jobs + push</li>
+          <li>OpenFreeMap tiles — check rate limits or self-host for prod</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <div class="next">
+    <div class="k" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+    <div>
+      <b>Suggested next step</b>
+      <p>Trigger CI so the Android <code>assembleDebug</code> runs for the first time. That single signal resolves the biggest open risk (Phase 2) and tells us exactly what — if anything — needs adjusting before on-device testing.</p>
+    </div>
+  </div>
+
+  <footer>
+    <span>GenTime — Android-only MVP · Phases 1–4</span>
+    <span>Status as of 17 Jul 2026</span>
+  </footer>
+</div>
+
+<script>
+  const root = document.documentElement;
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  function sync() {
+    const dark = root.getAttribute('data-theme') === 'dark'
+      || (!root.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    icon.textContent = dark ? '☾' : '☀';
+    label.textContent = dark ? 'Dark' : 'Light';
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    sync();
+  });
+  sync();
+</script>

@@ -1,0 +1,43 @@
+# ---------- General ----------
+.DS_Store
+*.log
+.env
+.env.local
+.env.*.local
+*.local
+
+# ---------- Node / Web ----------
+node_modules/
+web/dist/
+web/.vite/
+web/coverage/
+web/*.tsbuildinfo
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- Supabase ----------
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# ---------- Android ----------
+mobile/.gradle/
+mobile/build/
+mobile/**/build/
+mobile/local.properties
+mobile/.idea/
+mobile/captures/
+mobile/*.keystore
+mobile/*.jks
+mobile/app/release/
+*.apk
+*.aab
+*.iml
+
+# ---------- IDE ----------
+.vscode/
+.idea/
+*.swp
