@@ -51,6 +51,7 @@ fun AppRoot(state: AppState, vm: AppViewModel, activity: FragmentActivity) {
     if (state.locked) {
         UnlockScreen(
             pinLength = vm.pinLength,
+            lockoutRemainingMs = vm::pinLockoutRemainingMs,
             verify = vm::verifyPin,
             onUnlocked = vm::unlock,
             onUsePassword = vm::signOut,

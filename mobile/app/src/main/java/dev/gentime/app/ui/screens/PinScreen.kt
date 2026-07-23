@@ -90,6 +90,7 @@ fun SetPinScreen(onCreate: (String) -> Unit, onSignOut: () -> Unit) {
 @Composable
 fun UnlockScreen(
     pinLength: Int,
+    lockoutRemainingMs: () -> Long,
     verify: (String) -> Boolean,
     onUnlocked: () -> Unit,
     onUsePassword: () -> Unit,
@@ -97,26 +98,43 @@ fun UnlockScreen(
     val len = if (pinLength in MIN_LEN..MAX_LEN) pinLength else MAX_LEN
     var entry by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    var lockedMs by remember { mutableStateOf(lockoutRemainingMs()) }
+
+    // Tick the lockout countdown once a second so the keypad re-enables
+    // itself the moment the wait is over, without the user re-entering.
+    LaunchedEffect(lockedMs > 0) {
+        while (lockedMs > 0) {
+            kotlinx.coroutines.delay(1000)
+            lockedMs = lockoutRemainingMs()
+        }
+    }
 
     LaunchedEffect(entry) {
         if (entry.length == len) {
-            if (verify(entry)) {
+            if (lockedMs > 0) {
+                entry = ""
+            } else if (verify(entry)) {
                 onUnlocked()
             } else {
                 error = "Incorrect PIN. Try again."
                 entry = ""
+                lockedMs = lockoutRemainingMs()
             }
         }
     }
 
+    val locked = lockedMs > 0
     PinScaffold(
         title = "Enter your PIN",
         subtitle = "Unlock GenTime",
         filled = entry.length,
         total = len,
-        error = error,
-        onDigit = { c -> error = null; if (entry.length < len) entry += c },
-        onBackspace = { entry = entry.dropLast(1) },
+        error = when {
+            locked -> "Too many attempts. Try again in ${(lockedMs / 1000) + 1}s."
+            else -> error
+        },
+        onDigit = { c -> if (!locked) { error = null; if (entry.length < len) entry += c } },
+        onBackspace = { if (!locked) entry = entry.dropLast(1) },
         footer = {
             TextButton(onClick = onUsePassword) { Text("Use email & password instead") }
         },
