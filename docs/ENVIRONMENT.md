@@ -74,9 +74,29 @@ the in-database RPC of the same name directly.
   replace the placeholder `mobile/app/google-services.json`, `FCM_PROJECT_ID` /
   `FCM_ACCESS_TOKEN` are set on the `notify` function, and pg_net +
   `app.settings.functions_url` / `app.settings.service_role_key` are configured.
-- **Signed release** — keystore + GitHub secrets to tag `v1.0.0`.
-
 ## Test build
 
 A debug APK wired to this project is produced from `mobile/` with
 `./gradlew :app:assembleDebug` (config comes from `mobile/local.properties`).
+
+## Signed release build
+
+A **demo** keystore is committed at `mobile/keystore/gentime-demo.keystore`
+(alias `gentime`, store/key password `gentime-demo-2026`) so releases sign
+consistently and update-installs work across builds:
+
+```bash
+cd mobile
+KEYSTORE_PATH=$PWD/keystore/gentime-demo.keystore \
+KEYSTORE_PASSWORD=gentime-demo-2026 \
+KEY_ALIAS=gentime KEY_PASSWORD=gentime-demo-2026 \
+./gradlew :app:assembleRelease   # → app/build/outputs/apk/release/app-release.apk
+```
+
+> ⚠️ Demo-grade only: the keystore and its password are in the repo, so anyone
+> with repo access can sign as this app. Before any real distribution
+> (Play Store or wide sideloading), generate a private keystore, keep it out of
+> git, and wire it through GitHub Actions secrets (`KEYSTORE_PATH`,
+> `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` are already read by the
+> build). Release builds are minified by R8 (~4 MB vs ~27 MB debug); ProGuard
+> rules for Supabase/Ktor/serialization/Room live in `app/proguard-rules.pro`.
