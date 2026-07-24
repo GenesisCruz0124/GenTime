@@ -72,8 +72,12 @@ the in-database RPC of the same name directly.
 
 - **FCM / Firebase** — push is inert until a real Firebase project + credentials
   replace the placeholder `mobile/app/google-services.json`, `FCM_PROJECT_ID` /
-  `FCM_ACCESS_TOKEN` are set on the `notify` function, and pg_net +
-  `app.settings.functions_url` / `app.settings.service_role_key` are configured.
+  `FCM_SERVICE_ACCOUNT_JSON` are set as secrets on the `notify` Edge Function
+  (Project Settings > Edge Functions > Secrets, or `supabase secrets set`), and
+  pg_net + `app.settings.functions_url` / `app.settings.service_role_key` are
+  configured. `notify` mints its own short-lived FCM access token from the
+  service account on each call (cached per warm invocation) — no external
+  process has to refresh anything.
 ## Test build
 
 A debug APK wired to this project is produced from `mobile/` with

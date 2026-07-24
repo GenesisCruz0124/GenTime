@@ -30,7 +30,7 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", cfg("SUPABASE_URL", "SUPABASE_URL"))
         buildConfigField("String", "SUPABASE_ANON_KEY", cfg("SUPABASE_ANON_KEY", "SUPABASE_ANON_KEY"))
-        buildConfigField("String", "APP_VERSION", "\"1.0.0 · build 18\"")
+        buildConfigField("String", "APP_VERSION", "\"1.0.0 · build 19\"")
     }
 
     signingConfigs {
