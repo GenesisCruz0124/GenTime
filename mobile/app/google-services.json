@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "gentime-placeholder",
-    "storage_bucket": "gentime-placeholder.appspot.com"
+    "project_number": "837514604172",
+    "project_id": "gentime-9327a",
+    "storage_bucket": "gentime-9327a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:837514604172:android:eaed9620199c838ad915a9",
         "android_client_info": {
           "package_name": "dev.gentime.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "REPLACE_WITH_REAL_FIREBASE_ANDROID_API_KEY"
+          "current_key": "AIzaSyAk4M3CEKGaAv4Tiy_utyIovpRJqUytFxM"
         }
       ],
       "services": {

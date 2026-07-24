@@ -50,16 +50,11 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="gentime_alerts" />
 
-        <!-- FCM auto-init is disabled: the bundled google-services.json is a
-             placeholder, and FirebaseInitProvider would otherwise crash at
-             startup. Push is wired up but inert until a real Firebase project
-             is configured; login / punch / attendance all work without it. -->
-        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+        <!-- Firebase Analytics isn't used; keep it off regardless of a real
+             project being configured. Messaging auto-init and
+             FirebaseInitProvider are left at their defaults (enabled) now
+             that google-services.json points at a real project. -->
         <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
-        <provider
-            android:name="com.google.firebase.provider.FirebaseInitProvider"
-            android:authorities="${applicationId}.firebaseinitprovider"
-            tools:node="remove" />
 
         <!-- Disable androidx.startup auto-init: it runs before Application
              .onCreate, so a failure there is an invisible startup crash. We
