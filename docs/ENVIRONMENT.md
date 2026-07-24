@@ -18,8 +18,8 @@ committed and must only live in server-side secrets.
 
 ## What's applied
 
-- Migrations `0001`–`0006` (schema, RLS, RPCs, reports, Realtime, cron, FCM
-  triggers, function-grant hardening).
+- Migrations `0001`–`0007` (schema, RLS, RPCs, reports, Realtime, cron, FCM
+  triggers, function-grant hardening, pg_net + notify dispatch fix).
 - Seed data: 2 sites, 5 accounts, shifts.
 - pg_cron jobs scheduled (nightly DTR, geofence 5-min, missed check-in 10-min,
   ping purge daily).
@@ -45,6 +45,14 @@ All use password **`Password123!`**.
   team of 4; admin sees all 5.
 - `submit_attendance_event` RPC computes geofence correctly (`inside = true` at
   HQ coordinates).
+- **FCM push — fully live and verified end-to-end** (not just deployed):
+  real Firebase project (`gentime-9327a`), `google-services.json` in the app,
+  `FCM_PROJECT_ID` / `FCM_SERVICE_ACCOUNT_JSON` set on the `notify` function,
+  `pg_net` installed, and `dispatch_notify` wired to call it. Confirmed live:
+  a device registered a real FCM token via `onNewToken`, a leave-request
+  approval fired the `trg_leave_notify` trigger, `net.http_post` reached
+  `notify`, `notify` minted an access token from the service account, and a
+  push notification was delivered to and displayed on the physical device.
 - Security advisors: no ERRORs; RLS enabled on every table. SECURITY DEFINER
   functions not meant for REST were locked down in migration `0006`.
 
@@ -70,14 +78,9 @@ the in-database RPC of the same name directly.
 
 ## Not yet configured (post-Phase-1)
 
-- **FCM / Firebase** — push is inert until a real Firebase project + credentials
-  replace the placeholder `mobile/app/google-services.json`, `FCM_PROJECT_ID` /
-  `FCM_SERVICE_ACCOUNT_JSON` are set as secrets on the `notify` Edge Function
-  (Project Settings > Edge Functions > Secrets, or `supabase secrets set`), and
-  pg_net + `app.settings.functions_url` / `app.settings.service_role_key` are
-  configured. `notify` mints its own short-lived FCM access token from the
-  service account on each call (cached per warm invocation) — no external
-  process has to refresh anything.
+- **Signed distribution key** — the release keystore is the demo one committed
+  in-repo (see below); fine for testing, not for real distribution.
+
 ## Test build
 
 A debug APK wired to this project is produced from `mobile/` with
