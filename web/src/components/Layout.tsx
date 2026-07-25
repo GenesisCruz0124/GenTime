@@ -24,8 +24,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/attendance" className={linkClass}>Attendance</NavLink>
           <NavLink to="/leave" className={linkClass}>Leave Approvals</NavLink>
           <NavLink to="/alerts" className={linkClass}>Alerts</NavLink>
+          <NavLink to="/files" className={linkClass}>201 Files</NavLink>
           {isAdmin && (
             <NavLink to="/manage" className={linkClass}>Employees &amp; Sites</NavLink>
+          )}
+          {isAdmin && (
+            <NavLink to="/payroll-settings" className={linkClass}>Payroll Settings</NavLink>
           )}
           <NavLink to="/reports" className={linkClass}>Reports</NavLink>
         </nav>

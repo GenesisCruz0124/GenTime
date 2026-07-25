@@ -7,6 +7,9 @@ import { userClient } from "../_shared/client.ts";
 type Row = {
   employee_code: string;
   full_name: string;
+  position: string | null;
+  date_hired: string | null;
+  employment_type: string | null;
   days_present: number;
   days_late: number;
   total_minutes_late: number;
@@ -16,8 +19,9 @@ type Row = {
 };
 
 const HEADER = [
-  "employee_code", "full_name", "days_present", "days_late",
-  "total_minutes_late", "days_absent", "days_on_leave", "total_hours",
+  "employee_code", "full_name", "position", "date_hired", "employment_type",
+  "days_present", "days_late", "total_minutes_late", "days_absent",
+  "days_on_leave", "total_hours",
 ];
 
 function csvCell(v: unknown): string {

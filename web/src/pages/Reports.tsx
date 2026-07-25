@@ -6,8 +6,9 @@ import type { ReportRow } from "../lib/types";
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 const COLUMNS: (keyof ReportRow)[] = [
-  "employee_code", "full_name", "days_present", "days_late",
-  "total_minutes_late", "days_absent", "days_on_leave", "total_hours",
+  "employee_code", "full_name", "position", "date_hired", "employment_type",
+  "days_present", "days_late", "total_minutes_late", "days_absent",
+  "days_on_leave", "total_hours",
 ];
 
 export default function Reports() {
@@ -84,6 +85,9 @@ export default function Reports() {
             <tr>
               <th className="px-4 py-2">Code</th>
               <th className="px-4 py-2">Name</th>
+              <th className="px-4 py-2">Position</th>
+              <th className="px-4 py-2">Hired</th>
+              <th className="px-4 py-2">Type</th>
               <th className="px-4 py-2">Present</th>
               <th className="px-4 py-2">Late</th>
               <th className="px-4 py-2">Late min</th>
@@ -96,11 +100,14 @@ export default function Reports() {
             {loading ? (
               <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">Loading…</td></tr>
             ) : rows.length === 0 ? (
-              <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-400">Run a report to see results</td></tr>
+              <tr><td colSpan={11} className="px-4 py-6 text-center text-slate-400">Run a report to see results</td></tr>
             ) : rows.map((r) => (
               <tr key={r.profile_id} className="border-t border-slate-100">
                 <td className="px-4 py-2 font-mono">{r.employee_code}</td>
                 <td className="px-4 py-2">{r.full_name}</td>
+                <td className="px-4 py-2">{r.position ?? "—"}</td>
+                <td className="px-4 py-2">{r.date_hired ?? "—"}</td>
+                <td className="px-4 py-2 capitalize">{r.employment_type?.replace(/_/g, " ") ?? "—"}</td>
                 <td className="px-4 py-2">{r.days_present}</td>
                 <td className="px-4 py-2">{r.days_late}</td>
                 <td className="px-4 py-2">{r.total_minutes_late}</td>
