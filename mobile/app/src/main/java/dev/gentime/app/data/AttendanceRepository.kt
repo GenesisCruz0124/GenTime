@@ -12,7 +12,13 @@ import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.UUID
+
+/** One of today's punches, formatted for display in the local time zone. */
+data class TodayPunch(val type: String, val timeLocal: String, val synced: Boolean)
 
 /**
  * Single entry point for attendance. A punch is written to Room first
@@ -84,6 +90,27 @@ class AttendanceRepository(context: Context) {
             }
         }
         return allOk
+    }
+
+    /**
+     * Today's check-in/out punches from the on-device queue (works offline and
+     * before the nightly DTR job runs), oldest first. This is what backs the
+     * "Today" card, so a user always sees their login for the current day.
+     */
+    suspend fun todayPunches(): List<TodayPunch> {
+        val today = LocalDate.now().toString()
+        val fmt = DateTimeFormatter.ofPattern("h:mm a")
+        return dao.recent().mapNotNull { p ->
+            val zoned = runCatching {
+                Instant.parse(p.eventAt).atZone(ZoneId.systemDefault())
+            }.getOrNull() ?: return@mapNotNull null
+            if (zoned.toLocalDate().toString() != today) return@mapNotNull null
+            TodayPunch(
+                type = p.eventType,
+                timeLocal = zoned.format(fmt),
+                synced = p.status == PunchEntity.STATUS_SYNCED,
+            )
+        }.reversed()  // dao.recent() is newest-first; show chronological
     }
 
     suspend fun myRecords(limit: Int = 60): List<DailyRecord> {
