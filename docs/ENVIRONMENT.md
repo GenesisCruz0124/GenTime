@@ -18,8 +18,9 @@ committed and must only live in server-side secrets.
 
 ## What's applied
 
-- Migrations `0001`–`0007` (schema, RLS, RPCs, reports, Realtime, cron, FCM
-  triggers, function-grant hardening, pg_net + notify dispatch fix).
+- Migrations `0001`–`0008` (schema, RLS, RPCs, reports, Realtime, cron, FCM
+  triggers, function-grant hardening, pg_net + notify dispatch fix, Employee
+  201 File + PH payroll engine).
 - Seed data: 2 sites, 5 accounts, shifts.
 - pg_cron jobs scheduled (nightly DTR, geofence 5-min, missed check-in 10-min,
   ping purge daily).
@@ -75,6 +76,26 @@ npm run dev        # http://localhost:5173 — sign in with an account above
 
 `submit_attendance_event` is not deployed as a function — the mobile app calls
 the in-database RPC of the same name directly.
+
+## Employee 201 File + payroll (migration 0008)
+
+- **`profiles`** gains `position`, `date_hired`, `employment_type` (visible to
+  team + admin; surfaced in `report_summary`).
+- **`employee_details`** (1:1) holds sensitive PII, PH government IDs
+  (SSS/PhilHealth/Pag-IBIG/TIN), and compensation (`pay_rate` / `rate_type`).
+  RLS: admin read/write, supervisors read their team, employees no access.
+- **`employee_documents`** + private Storage bucket **`employee-docs`** (path
+  `{profile_id}/…`). Same admin-write / supervisor-team-read access; storage
+  policies enforce it via `storage.foldername`.
+- **`compute_payroll(profile, from, to)`** returns gross → SSS/PhilHealth/
+  Pag-IBIG/BIR-withholding → net, prorated by attendance.
+- **`payroll_settings`** + **`payroll_tax_brackets`** hold the statutory rates
+  as editable data. ⚠️ Seeded with recent-known defaults flagged
+  `rates_verified = false` — HR must verify against current circulars (web:
+  Payroll Settings page) before real payroll use.
+- Web: **201 Files** page (supervisor read / admin edit, document upload +
+  signed-URL download, per-employee payroll breakdown) and admin-only
+  **Payroll Settings**.
 
 ## Not yet configured (post-Phase-1)
 

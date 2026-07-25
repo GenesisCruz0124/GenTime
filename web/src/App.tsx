@@ -8,6 +8,8 @@ import Attendance from "./pages/Attendance";
 import LeaveApprovals from "./pages/LeaveApprovals";
 import Alerts from "./pages/Alerts";
 import EmployeesSites from "./pages/EmployeesSites";
+import EmployeeFiles from "./pages/EmployeeFiles";
+import PayrollSettings from "./pages/PayrollSettings";
 import Reports from "./pages/Reports";
 
 export default function App() {
@@ -47,7 +49,9 @@ export default function App() {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/leave" element={<LeaveApprovals />} />
         <Route path="/alerts" element={<Alerts />} />
+        <Route path="/files" element={<EmployeeFiles />} />
         {isAdmin && <Route path="/manage" element={<EmployeesSites />} />}
+        {isAdmin && <Route path="/payroll-settings" element={<PayrollSettings />} />}
         <Route path="/reports" element={<Reports />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>
