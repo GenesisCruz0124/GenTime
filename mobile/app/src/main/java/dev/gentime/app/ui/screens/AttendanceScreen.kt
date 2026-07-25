@@ -1,12 +1,16 @@
 package dev.gentime.app.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,14 +19,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
 import dev.gentime.app.data.AttendanceRepository
 import dev.gentime.app.data.TodayPunch
 import dev.gentime.app.data.model.DailyRecord
+import dev.gentime.app.ui.components.OutlineCardModifier
+import dev.gentime.app.ui.components.StatusPill
+import dev.gentime.app.ui.components.attendanceStatusStyle
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun AttendanceScreen(repo: AttendanceRepository) {
@@ -36,18 +47,27 @@ fun AttendanceScreen(repo: AttendanceRepository) {
         loading = false
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text("My Attendance", style = MaterialTheme.typography.headlineSmall)
+    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+        Text(
+            "My Attendance",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(top = 20.dp, bottom = 16.dp),
+        )
 
         TodayCard(today)
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(20.dp))
 
-        if (loading) {
-            Text("Loading…", Modifier.padding(top = 16.dp))
-        } else if (records.isEmpty()) {
-            Text("No records yet.", Modifier.padding(top = 16.dp))
-        } else {
-            LazyColumn(Modifier.padding(top = 12.dp)) {
+        Text(
+            "History",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        when {
+            loading -> Text("Loading…", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            records.isEmpty() -> Text("No records yet.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(records) { r -> RecordRow(r) }
             }
         }
@@ -58,51 +78,92 @@ fun AttendanceScreen(repo: AttendanceRepository) {
 private fun TodayCard(punches: List<TodayPunch>) {
     val checkIn = punches.firstOrNull { it.type == "check_in" }
     val checkOut = punches.lastOrNull { it.type == "check_out" }
-    Card(
-        Modifier.fillMaxWidth().padding(top = 12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(20.dp),
     ) {
-        Column(Modifier.padding(16.dp)) {
-            Text("Today", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(4.dp))
-            if (punches.isEmpty()) {
-                Text("No check-in yet today.", style = MaterialTheme.typography.bodyMedium)
-            } else {
+        Text(
+            "Today",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+        )
+        Spacer(Modifier.height(10.dp))
+        if (punches.isEmpty()) {
+            Text(
+                "No check-in yet.",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        } else {
+            Row(Modifier.fillMaxWidth()) {
+                TimeStat("Check in", checkIn?.timeLocal ?: "—", Modifier.weight(1f))
+                TimeStat("Check out", checkOut?.timeLocal ?: "—", Modifier.weight(1f))
+            }
+            if (punches.any { !it.synced }) {
+                Spacer(Modifier.height(10.dp))
                 Text(
-                    "Check in: ${checkIn?.timeLocal ?: "—"}",
-                    style = MaterialTheme.typography.bodyLarge,
+                    "Pending sync",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
                 )
-                Text(
-                    "Check out: ${checkOut?.timeLocal ?: "—"}",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                if (punches.any { !it.synced }) {
-                    Text(
-                        "Pending sync",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
             }
         }
     }
 }
 
 @Composable
-private fun RecordRow(r: DailyRecord) {
-    Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-        Column(Modifier.padding(12.dp)) {
-            Text(r.workDate, style = MaterialTheme.typography.titleSmall)
-            Text(
-                buildString {
-                    append(r.status.replace('_', ' ').replaceFirstChar { it.uppercase() })
-                    if (r.minutesLate > 0) append(" · ${r.minutesLate}m late")
-                    r.minutesWorked?.let { append(" · ${it / 60}h ${it % 60}m") }
-                },
-                style = MaterialTheme.typography.bodySmall,
-            )
-        }
+private fun TimeStat(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
     }
 }
+
+@Composable
+private fun RecordRow(r: DailyRecord) {
+    Row(
+        OutlineCardModifier().fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                formatDate(r.workDate),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+            )
+            val detail = buildString {
+                if (r.minutesLate > 0) append("${r.minutesLate}m late")
+                r.minutesWorked?.let {
+                    if (isNotEmpty()) append("  ·  ")
+                    append("${it / 60}h ${it % 60}m")
+                }
+            }
+            if (detail.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        StatusPill(attendanceStatusStyle(r.status))
+    }
+}
+
+// "2026-07-24" -> "Fri, Jul 24"
+private fun formatDate(iso: String): String = runCatching {
+    LocalDate.parse(iso).format(DateTimeFormatter.ofPattern("EEE, MMM d", Locale.getDefault()))
+}.getOrDefault(iso)

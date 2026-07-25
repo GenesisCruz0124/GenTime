@@ -9,18 +9,21 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,7 +38,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
@@ -44,6 +49,7 @@ import dev.gentime.app.data.AttendanceRepository
 import dev.gentime.app.data.Session
 import dev.gentime.app.location.LocationHelper
 import dev.gentime.app.location.TrackingService
+import dev.gentime.app.ui.components.OutlineCardModifier
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -194,42 +200,64 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     ) {
         LiveClock()
 
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(20.dp)) {
+        // Status: white card, thin outline, with a state dot.
+        Row(
+            OutlineCardModifier().fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                Modifier.size(10.dp).clip(CircleShape).background(
+                    if (onClock) Color(0xFF059669) else MaterialTheme.colorScheme.outline,
+                ),
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
                 Text(
-                    if (onClock) "You're on the clock" else "You're off the clock",
-                    style = MaterialTheme.typography.titleMedium,
+                    if (onClock) "On the clock" else "Off the clock",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
                 )
-                Spacer(Modifier.height(4.dp))
                 Text(
-                    if (pending > 0) "$pending punch(es) pending sync" else "All synced",
+                    if (pending > 0) "$pending pending sync" else "All synced",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (pending > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                    color = if (pending > 0) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
 
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(56.dp))
 
-        Button(
-            onClick = { onPunchClick() },
-            enabled = !busy,
-            shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (onClock) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary,
-            ),
-            modifier = Modifier.size(180.dp),
+        val punchColor = if (onClock) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary
+        Box(
+            Modifier
+                .size(184.dp)
+                .clip(CircleShape)
+                .background(punchColor)
+                .then(if (busy) Modifier else Modifier.clickable { onPunchClick() }),
+            contentAlignment = Alignment.Center,
         ) {
-            if (busy) CircularProgressIndicator(color = Color.White)
-            else Text(
-                if (onClock) "Check Out" else "Check In",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-            )
+            if (busy) {
+                CircularProgressIndicator(color = Color.White)
+            } else {
+                Text(
+                    if (onClock) "Check Out" else "Check In",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                )
+            }
         }
 
         Spacer(Modifier.height(24.dp))
-        message?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        message?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
         if (showOpenSettings) {
             Spacer(Modifier.height(12.dp))
             Button(onClick = { openAppSettings() }) { Text("Open Settings") }
