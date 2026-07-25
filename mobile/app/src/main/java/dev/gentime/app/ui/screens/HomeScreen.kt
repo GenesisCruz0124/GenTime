@@ -25,7 +25,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import dev.gentime.app.biometric.BiometricAuth
@@ -41,7 +44,40 @@ import dev.gentime.app.data.AttendanceRepository
 import dev.gentime.app.data.Session
 import dev.gentime.app.location.LocationHelper
 import dev.gentime.app.location.TrackingService
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+/** Live wall-clock: big time + full date, ticking each second. */
+@Composable
+private fun LiveClock() {
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            now = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+    val date = Date(now)
+    val time = remember { SimpleDateFormat("h:mm:ss a", Locale.getDefault()) }
+    val day = remember { SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault()) }
+    Text(
+        time.format(date),
+        style = MaterialTheme.typography.displaySmall,
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(Modifier.height(2.dp))
+    Text(
+        day.format(date),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(Modifier.height(24.dp))
+}
 
 private fun hasLocationPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -156,6 +192,8 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
+        LiveClock()
+
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(20.dp)) {
                 Text(
