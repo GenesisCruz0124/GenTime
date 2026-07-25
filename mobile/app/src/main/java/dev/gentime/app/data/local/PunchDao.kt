@@ -18,6 +18,16 @@ interface PunchDao {
     @Query("SELECT COUNT(*) FROM punch_queue WHERE status = 'queued' OR status = 'error'")
     fun pendingCount(): Flow<Int>
 
+    // Newest punches regardless of sync status — used to surface "today" locally,
+    // since the computed daily record only appears after the overnight job.
+    @Query("SELECT * FROM punch_queue ORDER BY eventAt DESC LIMIT 30")
+    suspend fun recent(): List<PunchEntity>
+
+    // Most recent error message among unsynced punches, so the UI can explain
+    // why a punch isn't syncing instead of silently retrying forever.
+    @Query("SELECT lastError FROM punch_queue WHERE status = 'error' AND lastError IS NOT NULL ORDER BY eventAt DESC LIMIT 1")
+    fun lastError(): Flow<String?>
+
     @Query("UPDATE punch_queue SET status = :status, attempts = attempts + 1, lastError = :error WHERE clientEventId = :id")
     suspend fun mark(id: String, status: String, error: String?)
 }
