@@ -85,6 +85,22 @@ private fun LiveClock() {
     Spacer(Modifier.height(24.dp))
 }
 
+/**
+ * Turns a raw sync error into a plain-language cause the user can act on. Only
+ * permanent failures are surfaced; transient (network) errors return null so we
+ * don't alarm the user over something the automatic retry will clear.
+ */
+private fun syncErrorMessage(raw: String?): String? {
+    raw ?: return null
+    return when {
+        raw.contains("device_mismatch") ->
+            "This device isn't registered — ask your admin to reset your device."
+        raw.contains("profile_inactive") ->
+            "Your account is inactive — contact your admin."
+        else -> null
+    }
+}
+
 private fun hasLocationPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
         PackageManager.PERMISSION_GRANTED ||
@@ -102,6 +118,7 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
     // with "don't ask again") — offers a one-tap jump to the app's settings.
     var showOpenSettings by remember { mutableStateOf(false) }
     val pending by repo.pendingCount.collectAsState(initial = 0)
+    val syncError by repo.lastSyncError.collectAsState(initial = null)
 
     fun openAppSettings() {
         runCatching {
@@ -217,10 +234,15 @@ fun HomeScreen(repo: AttendanceRepository, activity: FragmentActivity) {
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                 )
+                val friendly = syncErrorMessage(syncError)
                 Text(
-                    if (pending > 0) "$pending pending sync" else "All synced",
+                    when {
+                        friendly != null -> friendly
+                        pending > 0 -> "$pending pending sync"
+                        else -> "All synced"
+                    },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (pending > 0) MaterialTheme.colorScheme.error
+                    color = if (friendly != null || pending > 0) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

@@ -34,6 +34,9 @@ class AttendanceRepository(context: Context) {
 
     val pendingCount: Flow<Int> = dao.pendingCount()
 
+    /** Raw error text of the most recent failed sync, or null if none. */
+    val lastSyncError: Flow<String?> = dao.lastError()
+
     suspend fun currentProfile(): Profile? {
         val uid = Supa.client.auth.currentUserOrNull()?.id ?: return null
         return Supa.client.postgrest["profiles"]
