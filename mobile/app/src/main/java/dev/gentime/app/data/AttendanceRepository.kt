@@ -101,11 +101,12 @@ class AttendanceRepository(context: Context) {
      * "Today" card, so a user always sees their login for the current day.
      */
     suspend fun todayPunches(): List<TodayPunch> {
-        val today = LocalDate.now().toString()
+        val manila = ZoneId.of("Asia/Manila")
+        val today = LocalDate.now(manila).toString()
         val fmt = DateTimeFormatter.ofPattern("h:mm a")
         return dao.recent().mapNotNull { p ->
             val zoned = runCatching {
-                Instant.parse(p.eventAt).atZone(ZoneId.systemDefault())
+                Instant.parse(p.eventAt).atZone(manila)
             }.getOrNull() ?: return@mapNotNull null
             if (zoned.toLocalDate().toString() != today) return@mapNotNull null
             TodayPunch(

@@ -53,6 +53,7 @@ import dev.gentime.app.ui.components.OutlineCardModifier
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -67,8 +68,11 @@ private fun LiveClock() {
         }
     }
     val date = Date(now)
-    val time = remember { SimpleDateFormat("h:mm:ss a", Locale.getDefault()) }
-    val day = remember { SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault()) }
+    // Attendance is anchored to Philippine Standard Time regardless of the
+    // device's own time zone, so everyone sees the same clock.
+    val manila = TimeZone.getTimeZone("Asia/Manila")
+    val time = remember { SimpleDateFormat("h:mm:ss a", Locale.US).apply { timeZone = manila } }
+    val day = remember { SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.US).apply { timeZone = manila } }
     Text(
         time.format(date),
         style = MaterialTheme.typography.displaySmall,
